@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  --color-ink: #102a43;
+  --color-ink-soft: #243b53;
+  --color-canvas: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-sage: #5b7564;
+  --color-sage-pale: #e8efe8;
+  --color-copper: #b46f4b;
+  --color-copper-dark: #8c4f30;
+  --color-line: #d7d4cc;
+  --color-muted: #627d98;
+  --color-danger: #a3392b;
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-canvas: var(--color-canvas);
+  --color-surface: var(--color-surface);
+  --color-sage: var(--color-sage);
+  --color-sage-pale: var(--color-sage-pale);
+  --color-copper: var(--color-copper);
+  --color-copper-dark: var(--color-copper-dark);
+  --color-line: var(--color-line);
+  --color-muted: var(--color-muted);
+  --color-danger: var(--color-danger);
+
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+::selection {
+  background: var(--color-copper);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-copper);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

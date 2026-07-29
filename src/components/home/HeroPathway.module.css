@@ -1,0 +1,146 @@
+.wrap {
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 80% 10%, rgba(232, 239, 232, 0.6), transparent 60%),
+    var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px -30px rgba(16, 42, 67, 0.35);
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.route {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.42;
+  stroke: var(--color-sage);
+  transition:
+    opacity 0.35s ease,
+    stroke-width 0.35s ease,
+    stroke 0.35s ease;
+}
+
+.routeDraw {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  animation: draw 1.7s cubic-bezier(0.4, 0.05, 0.2, 1) forwards;
+}
+
+.spine {
+  stroke: var(--color-ink);
+  stroke-width: 3;
+  opacity: 0.9;
+}
+
+.spineDraw {
+  animation-delay: 0.9s;
+  animation-duration: 1.5s;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.node circle {
+  fill: var(--color-surface);
+  stroke: var(--color-sage);
+  stroke-width: 2;
+  transition:
+    r 0.3s ease,
+    stroke-width 0.3s ease,
+    stroke 0.3s ease;
+}
+
+.halo {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.node text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  fill: var(--color-ink-soft);
+  transition: fill 0.3s ease;
+}
+
+.converge circle {
+  fill: var(--color-ink);
+  stroke: var(--color-ink);
+}
+
+.converge text {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-style: italic;
+  fill: var(--color-ink);
+}
+
+.branch {
+  cursor: pointer;
+}
+
+.branch:focus {
+  outline: none;
+}
+
+.branch:focus-visible .node circle {
+  stroke: var(--color-copper);
+  stroke-width: 3;
+}
+
+.branchActive .route {
+  opacity: 1;
+  stroke: var(--color-copper) !important;
+  stroke-width: 3.25;
+}
+
+.branchActive .node circle {
+  stroke: var(--color-copper);
+  stroke-width: 3;
+  r: 8;
+}
+
+.branchActive .halo {
+  opacity: 0.55;
+  stroke: var(--color-copper);
+}
+
+.branchActive .node text {
+  fill: var(--color-copper-dark);
+  font-weight: 600;
+}
+
+.caption {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.live {
+  min-height: 1em;
+  color: var(--color-copper-dark);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routeDraw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
