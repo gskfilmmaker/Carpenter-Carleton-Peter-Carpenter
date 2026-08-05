@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { ButtonLink } from "@/components/ui/Button";
+import { NextAvailableSlotHint } from "@/components/booking/NextAvailableSlotHint";
 
 export function FinalConversionBand() {
   return (
@@ -13,9 +15,14 @@ export function FinalConversionBand() {
           You do not need every answer before you begin. You need the right next conversation.
         </p>
         <div className="mt-8 flex justify-center">
-          <ButtonLink href="/contact" className="!bg-white !text-ink hover:!bg-slate-100">
+          <ButtonLink href="/book" className="!bg-white !text-ink hover:!bg-slate-100">
             Book a Confidential Consultation
           </ButtonLink>
+        </div>
+        <div className="mt-4 flex justify-center text-ink">
+          <Suspense fallback={null}>
+            <NextAvailableSlotHint />
+          </Suspense>
         </div>
       </Container>
     </section>

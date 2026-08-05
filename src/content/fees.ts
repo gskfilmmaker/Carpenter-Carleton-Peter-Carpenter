@@ -2,8 +2,12 @@ import type { FeeItem } from "@/content/types";
 
 /**
  * Public prices are withheld until Peter approves a final schedule (build brief section 7 / 12).
- * The comparison tiers below are structural placeholders — every `amount` is intentionally
- * omitted and every `approved` flag is false, so no number can leak to production by accident.
+ * The comparison tiers below are structural placeholders — `approved` is false on every tier, so
+ * no number can go live by accident: the booking flow only ever calls Stripe when BOTH
+ * PAYMENTS_ENABLED=true AND a tier's `approved` flag is true (see src/lib/payments.ts). The
+ * `consultation` tier carries an illustrative `amount` (CAD dollars) purely so the Stripe Checkout
+ * integration can be exercised end-to-end in test mode — it is not a public claim (the Fees page
+ * never renders `amount`) and must be replaced with Peter's actual approved figure before launch.
  */
 export const feeTiers: FeeItem[] = [
   {
@@ -23,8 +27,10 @@ export const feeTiers: FeeItem[] = [
   {
     service: "consultation",
     publicLabel: "Consultation",
-    priceType: "consultation-required",
+    priceType: "fixed",
+    amount: 150, // illustrative test-mode figure only — see file header comment
     currency: "CAD",
+    taxNote: "Plus applicable tax",
     inclusions: [
       "45–60 minute video or phone consultation",
       "A pathway map and key evidence gaps",

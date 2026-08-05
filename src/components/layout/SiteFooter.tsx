@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { primaryNav, site } from "@/content/site";
+import {
+  formatPhoneForDisplay,
+  mailtoHref,
+  primaryNav,
+  site,
+  telHref,
+  whatsAppDefaultMessage,
+  whatsAppHref,
+} from "@/content/site";
 
 export function SiteFooter() {
   return (
@@ -26,6 +34,28 @@ export function SiteFooter() {
             </a>
             <p>{site.addressLine}</p>
           </div>
+          <ul className="mt-5 space-y-1.5 text-sm text-slate-300">
+            <li>
+              <a href={mailtoHref(site.publicEmail)} className="hover:text-white">
+                {site.publicEmail}
+              </a>
+            </li>
+            <li>
+              <a href={telHref(site.businessPhone)} className="hover:text-white">
+                {formatPhoneForDisplay(site.businessPhone)}
+              </a>
+            </li>
+            <li>
+              <a
+                href={whatsAppHref(site.businessWhatsApp, whatsAppDefaultMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white"
+              >
+                WhatsApp: {formatPhoneForDisplay(site.businessWhatsApp)}
+              </a>
+            </li>
+          </ul>
         </div>
 
         <div>
@@ -50,13 +80,18 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/book" className="hover:text-white">
+                Book a consultation
+              </Link>
+            </li>
+            <li>
               <Link href="/contact" className="hover:text-white">
-                Contact / book a consultation
+                Send a message
               </Link>
             </li>
             <li>
               <a
-                href="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigration-citizenship-representative/learn-about-representatives.html"
+                href={site.representativeInfoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-white"

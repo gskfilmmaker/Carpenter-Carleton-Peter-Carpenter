@@ -70,7 +70,7 @@ export default function AboutPage() {
           <li>Client documents are handled through a secure, consent-based process.</li>
         </ul>
         <div className="mt-8">
-          <ButtonLink href="/contact">Book a consultation</ButtonLink>
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
         </div>
       </Section>
     </>

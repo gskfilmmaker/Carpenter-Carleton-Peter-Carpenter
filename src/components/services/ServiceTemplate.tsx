@@ -26,7 +26,7 @@ export function ServiceTemplate({ service, afterHero }: { service: Service; afte
           </p>
         )}
         <div className="mt-7 flex flex-wrap gap-3.5">
-          <ButtonLink href="/contact">{service.ctaLabel}</ButtonLink>
+          <ButtonLink href="/book">{service.ctaLabel}</ButtonLink>
           <ButtonLink href="/start-here" variant="secondary">
             Not sure this is the right route? Take the Pathway Clarity Check
           </ButtonLink>
@@ -135,7 +135,7 @@ export function ServiceTemplate({ service, afterHero }: { service: Service; afte
             <p className="font-serif text-2xl font-normal">Ready to talk through your situation?</p>
             <p className="mt-2 max-w-xl text-sm text-slate-300">{site.noGuaranteeNotice}</p>
           </div>
-          <ButtonLink href="/contact" className="!bg-white !text-ink hover:!bg-slate-100">
+          <ButtonLink href="/book" className="!bg-white !text-ink hover:!bg-slate-100">
             {service.ctaLabel}
           </ButtonLink>
         </div>

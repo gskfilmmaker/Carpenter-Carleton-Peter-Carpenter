@@ -82,7 +82,7 @@ export function PathwayCheckFlow() {
         </p>
         {submitError && <p className="mt-3 text-sm text-danger">{submitError}</p>}
         <div className="mt-8 flex flex-wrap gap-3.5">
-          <ButtonLink href="/contact">Book a consultation</ButtonLink>
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
           {relatedService && (
             <>
               <ButtonLink href={relatedService.officialSources[0]?.url ?? "/resources"} variant="secondary">

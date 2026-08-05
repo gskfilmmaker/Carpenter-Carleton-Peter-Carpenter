@@ -20,7 +20,7 @@ export function HeroSection() {
           <ButtonLink href="/start-here" variant="primary">
             Find Your Starting Point
           </ButtonLink>
-          <ButtonLink href="/contact" variant="secondary">
+          <ButtonLink href="/book" variant="secondary">
             Book a Confidential Consultation
           </ButtonLink>
         </div>

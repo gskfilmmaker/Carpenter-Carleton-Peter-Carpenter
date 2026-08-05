@@ -5,6 +5,9 @@ import { SkipLink } from "@/components/layout/SkipLink";
 import { TrustBar } from "@/components/layout/TrustBar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { WhatsAppFloat } from "@/components/contact/WhatsAppFloat";
+import { StickyBookCTA } from "@/components/contact/StickyBookCTA";
+import { StructuredData } from "@/components/seo/StructuredData";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -40,13 +43,16 @@ export default function RootLayout({
       className={`${inter.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <StructuredData />
         <SkipLink />
         <TrustBar />
         <SiteHeader />
-        <main id="main" className="flex-1">
+        <main id="main" className="flex-1 pb-16 sm:pb-0">
           {children}
         </main>
         <SiteFooter />
+        <WhatsAppFloat />
+        <StickyBookCTA />
       </body>
     </html>
   );

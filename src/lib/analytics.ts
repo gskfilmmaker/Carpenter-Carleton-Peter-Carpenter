@@ -15,7 +15,10 @@ export const analyticsEvents = {
   leadMagnetDownload: "lead_magnet_download",
   resourceSubscribe: "resource_subscribe",
   clickCall: "click_call",
+  clickWhatsapp: "click_whatsapp",
   clickCiccVerify: "click_cicc_verify",
+  selectSlot: "select_slot",
+  selectMeetingFormat: "select_meeting_format",
 } as const;
 
 export type AnalyticsEvent = (typeof analyticsEvents)[keyof typeof analyticsEvents];

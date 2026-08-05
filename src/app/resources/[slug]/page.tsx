@@ -90,7 +90,7 @@ export default async function ResourceArticlePage({
           ))}
         </ul>
         <div className="mt-8">
-          <ButtonLink href="/contact">Book a consultation</ButtonLink>
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
         </div>
       </Section>
     </article>

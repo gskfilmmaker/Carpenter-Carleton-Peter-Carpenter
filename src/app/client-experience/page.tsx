@@ -54,7 +54,7 @@ export default function ClientExperiencePage() {
           <li>We never publish a review as our own if it originated on an independent platform without linking to that source where possible.</li>
         </ul>
         <div className="mt-8">
-          <ButtonLink href="/contact">Book a consultation</ButtonLink>
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
         </div>
       </Section>
     </>

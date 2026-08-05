@@ -21,7 +21,7 @@ export default function HowItWorksPage() {
           is honest about what is — and is not — in our control.
         </p>
         <div className="mt-7">
-          <ButtonLink href="/contact">Book a consultation</ButtonLink>
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
         </div>
       </Section>
       <ProcessTimeline />

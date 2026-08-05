@@ -1,6 +1,6 @@
 # Implementation Plan — Carpenter & Carleton Immigration Platform
 
-**Status:** Phase 1 in progress
+**Status:** Phase 1 complete; Phase 2 (conversion system) complete
 **Source brief:** `Claude Code — Premium Immigration Website Build Brief v1.0` + `Market & Website Master Plan`
 
 This document is the first deliverable required by the build brief (section 0). It records the
@@ -46,10 +46,21 @@ fallback instruction.
 /resources                         Resources index (Policy Desk, Guides, FAQs, Official Links)
 /about                             About Peter / Our Practice
 /client-experience                 Client Experience (gated testimonials)
-/contact                           Contact / Book Consultation
-/api/booking                       POST — booking/service enquiry (Zod-validated)
+/contact                           Send a message (lightweight enquiry — Phase 2)
+/book                               Book a Consultation (two-step scheduling flow — Phase 2)
+/book/confirmation                 Stripe Checkout return URL — verifies payment, shows confirmation
+/api/contact                       POST — contact enquiry (Zod-validated, Turnstile, timing check)
+/api/callback                      POST — call-back request (config-flagged, off by default)
+/api/book                          POST — booking submission (calendar + optional Stripe Checkout)
+/api/book/availability             GET — bookable slots, 08:00–20:00 America/Toronto
+/api/book/verify-session           GET — verifies a Stripe Checkout session for the confirmation page
+/api/webhooks/stripe               POST — Stripe webhook, signature-verified server-side
 /api/pathway-check                 POST — Pathway Clarity Check result (privacy-safe)
 ```
+
+`primaryCta` (header button, most service-page and homepage CTAs) now points to `/book`. `/contact`
+remains for a lighter, no-time-commitment enquiry and is still linked from the footer and the Fees
+page ("Contact us for a written scope and fee agreement").
 
 Phase 1 ships every route listed with real, reviewed layout and copy; routes marked "template stub"
 get the full service-page template with clearly labeled placeholder body content rather than being
@@ -77,8 +88,27 @@ guard throws/filters at build time if a `Service`/`Resource` is missing `officia
 brief's CMS approval guard without an actual CMS backend.
 
 ### Forms
-`ContactForm` (Zod schema shared between client and `/api/booking` route), `PathwayCheckFlow`
-(client-side state machine, no server round-trip needed until submission).
+`ContactForm` (`/contact` — country/status/goal/language/timeline intake, Zod schema shared with
+`/api/contact`), `PathwayCheckFlow` (client-side state machine for `/start-here`, no server
+round-trip needed until submission), `BookingFlow` (`/book` — two-step: consultation type + meeting
+format/video platform, then dual-timezone slot picker + minimal enquiry fields), `CallbackRequestForm`
+(config-flagged, off by default).
+
+### Contact & conversion components (Phase 2)
+`ContactChannels` (email/call/WhatsApp), `WhatsAppFloat` (sitewide floating entry point, dismissible
+via `useSyncExternalStore` over `sessionStorage` rather than an effect, so there's no
+hydration-mismatch risk), `StickyBookCTA` (mobile-only, appears on scroll, hides near the footer),
+`FaqAccordion` (reused on `/contact` and `/book`), `NextAvailableSlotHint`, `BookingConfirmation`
+(shared between the inline no-payment confirmation and the post-Stripe-redirect confirmation page).
+
+### Booking domain (`src/lib/adapters/calendar.ts`, `src/lib/timezone.ts`)
+`CalendarAdapter` interface with `listAvailability`/`requestBooking`. `devCalendarAdapter` generates
+DST-safe 08:00–20:00 America/Toronto slots with no external dependency (the `zonedTimeToUtc` /
+`offsetMinutesAt` helpers in `src/lib/timezone.ts` use the `Intl.DateTimeFormat` `formatToParts`
+technique rather than a date library). `calComAdapter` calls Cal.com's v2 API when
+`CALCOM_API_KEY`/`CALCOM_EVENT_TYPE_ID` are set and falls back to the dev adapter on any request
+failure or unexpected response shape — the booking flow never breaks even if a field name has
+drifted from what's documented below.
 
 ---
 
@@ -87,10 +117,11 @@ brief's CMS approval guard without an actual CMS backend.
 | Integration | Status | Notes |
 |---|---|---|
 | Sanity (or chosen CMS) project/token | **Not provisioned** | Content ships as typed local modules now; swap-in point documented above. |
-| Calendly / Cal.com / Google/Microsoft Calendar | **Not provisioned** | Booking route currently stores/echoes a structured request via the adapter interface; no calendar write happens. |
-| Resend (or transactional email) | **Not provisioned** | Email adapter is a typed interface with a dev console logger; no PII leaves the server. |
-| Cloudflare Turnstile (or equivalent) | **Not provisioned** | Honeypot field + basic in-memory rate limit ship now; Turnstile site/secret key is a launch input. |
-| GA4 / PostHog | **Not provisioned** | No analytics script ships until a consent-managed provider + key exists; event names from brief §9 are defined as constants ready to wire up. |
+| Cal.com | **Adapter built, real API wired, credentials not provisioned** | `src/lib/adapters/calendar.ts` calls Cal.com v2's `/slots` and `/bookings` endpoints per their publicly documented shape. Their docs/API returned HTTP 403 to this environment's outbound fetcher (bot protection), so exact current field names could not be double-checked live — verify against a real Cal.com sandbox before enabling in production. Falls back safely to the dev slot generator either way. |
+| Resend (transactional email) | **Adapter built, real API wired, credentials not provisioned** | `src/lib/adapters/email.ts` posts to `api.resend.com/emails` (including `scheduled_at` for the 3-email pre-consultation sequence) once `RESEND_API_KEY` is set; the dev adapter logs only the template name otherwise. |
+| Cloudflare Turnstile | **Client + server code built, keys not provisioned** | `src/components/forms/Turnstile.tsx` renders nothing without `NEXT_PUBLIC_TURNSTILE_SITE_KEY`; `src/lib/turnstile.ts` treats verification as passed without `TURNSTILE_SECRET_KEY`. Forms currently rely on the honeypot field + a render-to-submit timing check + the in-memory rate limiter. |
+| Stripe | **Checkout + webhook built, gated off** | `src/lib/payments.ts` requires both `PAYMENTS_ENABLED=true` and the relevant `FeeItem.approved === true` before any Checkout session is created; either gate closed keeps every booking request-only ("Fee confirmed in writing before any representation begins."). Webhook signature is verified server-side (`STRIPE_WEBHOOK_SECRET`) before any confirmation is sent — payment is never inferred from the client redirect alone. Apple Pay/Google Pay come free via Stripe Checkout's built-in wallet detection, no extra integration. |
+| GA4 / PostHog | **Not provisioned** | No analytics script ships until a consent-managed provider + key exists; event names from brief §9 (plus `click_whatsapp`, `select_slot`, `select_meeting_format` added in Phase 2) are defined as constants ready to wire up. |
 | Domain/hosting | **Not provisioned** | Out of scope for this repo. |
 
 All of the above are also tracked in `docs/LAUNCH-INPUTS-CHECKLIST.md`.
@@ -114,9 +145,20 @@ All of the above are also tracked in `docs/LAUNCH-INPUTS-CHECKLIST.md`.
 - Explicit "do not send passports/bank statements/portal passwords" notice on contact/booking forms.
 
 **Security**
-- Zod schema validated server-side in the API route (never trust client-only validation).
-- Honeypot field + basic IP/time-window rate limiting on `/api/booking` and `/api/pathway-check`.
-- No secrets in source; `.env.example` documents required keys without values.
+- Zod schema validated server-side in every API route (never trust client-only validation).
+- Honeypot field + a render-to-submit timing check (`src/lib/form-timing.ts`) + basic IP/time-window
+  rate limiting on `/api/contact`, `/api/book`, `/api/callback` and `/api/pathway-check`.
+- Cloudflare Turnstile verified server-side when configured (`src/lib/turnstile.ts`); a no-op pass
+  when it isn't, so forms stay usable either way.
+- No secrets in source; `.env.example` documents required keys without values. `server-only` guards
+  `src/lib/adapters/email.ts`, `src/lib/payments.ts` and `src/lib/server/internal-contact.ts` so a
+  build fails loudly if any client component ever imports them.
+- Stripe secret key and webhook secret never reach the client bundle (verified against the built
+  `.next/static` output); Checkout is created server-side and the browser only ever receives a
+  redirect URL. The webhook route verifies `stripe-signature` against the raw request body before
+  trusting any event.
+- Peter's secondary phone number is exported only from a `server-only`-guarded module and is not
+  rendered anywhere in the current UI — see `docs/LAUNCH-INPUTS-CHECKLIST.md`.
 - No Government of Canada / CICC logos or crests anywhere; CICC Public Register is a plain text link.
 
 ---
@@ -133,13 +175,27 @@ Here flow, booking form with Zod validation + honeypot + rate limiting, docs (`I
 map resolves; mobile nav opens/closes via mouse and keyboard; no invented licensing/price/testimonial
 claim exists anywhere in seed content.
 
-### Phase 2 — Conversion system
-Wire a real calendar adapter once credentials exist; CRM lead adapter; email templates; resource/
-lead-magnet gated download flow; expand Pathway Clarity Check result copy with Peter-approved route
-rules.
+### Phase 2 — Conversion system (this PR)
+Real contact details wired sitewide from a single source of truth (`src/content/site.ts`); a working
+`/contact` enquiry form (country/status/goal/language/timeline, Turnstile-ready, honeypot + timing +
+rate-limited); email/call/WhatsApp contact channels plus a sitewide floating WhatsApp button and a
+mobile sticky booking bar; a full `/book` two-step scheduling flow (consultation type → meeting
+format/video platform → dual-timezone slot picker → minimal enquiry) backed by a DST-safe dev slot
+generator and a real (fallback-safe) Cal.com v2 adapter; a gated Stripe Checkout integration that
+stays request-only until `PAYMENTS_ENABLED` and a specific `FeeItem.approved` are both true; a
+3-email pre-consultation sequence; a config-flagged call-back request form; `ProfessionalService`
+JSON-LD with only confirmed NAP fields; every primary "Book a Consultation" CTA sitewide repointed
+from `/contact` to `/book`.
 
-**Acceptance:** end-to-end Home → Start Here → result → booking → confirmation works with no console
-PII leakage.
+**Acceptance:** `npm run lint`, `tsc --noEmit` and `npm run build` all pass (33 routes generated).
+Manually verified against the production build: `/`, `/book`, `/contact`, `/book/confirmation` and a
+service page all return 200; `/api/book/availability` returns correctly-windowed Toronto slots; a
+full `/api/book` submission (no payment configured) returns a reference and triggers the 3-email dev
+log sequence with no PII in the log output; the honeypot rejects a spam-shaped submission with 400.
+Confirmed via `grep` against `.next/static` that neither `STRIPE_SECRET_KEY` nor the secondary phone
+number appear in the client bundle. Deferred to Phase 4 (not yet run): Playwright + Axe automated
+pass — see `docs/LAUNCH-INPUTS-CHECKLIST.md` for the credentials Phase 2's real integrations still
+need before they're live (Cal.com, Resend, Turnstile, Stripe).
 
 ### Phase 3 — Editorial authority
 Full content for all remaining service pages, Policy Desk articles, FAQs, internal linking, SEO

@@ -15,7 +15,7 @@ export function EmployerWorkerSplit() {
       </p>
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
         <Link
-          href="/contact?type=employer"
+          href="/book?type=employer"
           className="rounded-2xl border border-line bg-canvas p-6 hover:border-copper"
         >
           <p className="font-medium text-ink">I am an employer exploring hiring / compliance</p>
@@ -24,7 +24,7 @@ export function EmployerWorkerSplit() {
           </p>
         </Link>
         <Link
-          href="/contact?type=worker"
+          href="/book?type=worker"
           className="rounded-2xl border border-line bg-canvas p-6 hover:border-copper"
         >
           <p className="font-medium text-ink">I am a worker exploring a work permit</p>
