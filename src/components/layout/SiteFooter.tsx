@@ -109,6 +109,16 @@ export function SiteFooter() {
           <p className="max-w-2xl">{site.noGuaranteeNotice}</p>
         </Container>
       </div>
+
+      {/* Low-emphasis management credit — deliberately quieter than everything above it, and never
+          competing with the firm brand or the RCIC trust module. */}
+      <div className="border-t border-white/5">
+        <Container className="py-3">
+          {/* text-slate-400 (not -500) — Axe-verified 4.5:1+ against bg-ink; low emphasis comes
+              from the small size and its own quiet row, not from failing contrast. */}
+          <p className="text-[0.7rem] text-slate-400">Site managed by {site.managedBy}</p>
+        </Container>
+      </div>
     </footer>
   );
 }

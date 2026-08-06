@@ -5,9 +5,9 @@
  * `legalName`, `representativeName`, `collegeId` and `addressLine` remain placeholders pending
  * Peter's written approval — see docs/LAUNCH-INPUTS-CHECKLIST.md. `publicEmail`, `businessPhone`
  * and `businessWhatsApp` were supplied directly as real, current contact details and are safe to
- * publish. `secondaryPhone` (Peter's direct line) is intentionally NOT exported here — it is
- * server-only, see src/lib/server/internal-contact.ts, and stays off the public site unless
- * SHOW_SECONDARY_PHONE=true.
+ * publish. Peter's direct line and the internal-notification recipient list are intentionally NOT
+ * exported here — this module is imported by client components, so anything on it ships in the
+ * client bundle. Those two live server-only in src/lib/server/internal-contact.ts instead.
  */
 
 export const site = {
@@ -28,6 +28,18 @@ export const site = {
   businessWhatsApp: "+16478613970",
   addressLine: "Greater Toronto Area, Ontario, Canada", // placeholder — exact office address pending approval
   serviceArea: "Greater Toronto Area, Ontario, Canada",
+
+  // Transactional email routing — single source of truth, see src/lib/adapters/email.ts.
+  // (The internal-notification recipient list is intentionally NOT here — it's server-only, see
+  // src/lib/server/internal-contact.ts, because this `site` object is imported by client
+  // components and anything on it ships in the client bundle.)
+  emailFrom: "info@carpentercarleton.ca",
+  emailReplyTo: "info@carpentercarleton.ca",
+
+  /** Disclosed truthfully in the footer and on /privacy — payments are processed by GSK
+   * Productions Inc. via Stripe on Carpenter & Carleton's behalf (single GSK Stripe account,
+   * merchant of record; not a Stripe Connect setup). */
+  managedBy: "GSK Productions Inc.",
 } as const;
 
 /** Config-flagged features that ship off by default until Peter opts in. */

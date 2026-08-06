@@ -1,13 +1,16 @@
 import type { FeeItem } from "@/content/types";
 
 /**
- * Public prices are withheld until Peter approves a final schedule (build brief section 7 / 12).
- * The comparison tiers below are structural placeholders — `approved` is false on every tier, so
- * no number can go live by accident: the booking flow only ever calls Stripe when BOTH
- * PAYMENTS_ENABLED=true AND a tier's `approved` flag is true (see src/lib/payments.ts). The
- * `consultation` tier carries an illustrative `amount` (CAD dollars) purely so the Stripe Checkout
- * integration can be exercised end-to-end in test mode — it is not a public claim (the Fees page
- * never renders `amount`) and must be replaced with Peter's actual approved figure before launch.
+ * The `consultation` tier is the live $250 CAD Confidential Consultation fee, charged through
+ * Stripe at the final /book step. Its `approved: true` and its amount reflect this task's explicit
+ * instruction. The booking flow still only calls Stripe when BOTH `PAYMENTS_ENABLED=true` (an
+ * infra/env switch, not something this repo can set — see docs/LAUNCH-INPUTS-CHECKLIST.md) AND
+ * `approved === true` are true (src/lib/payments.ts `isPaymentsLive`), so nothing charges by
+ * accident from a code change alone. Every other tier here remains an unpriced structural
+ * placeholder pending Peter's final schedule.
+ *
+ * Tax treatment (HST or otherwise) is NOT hard-coded here — it's read at render/charge time from
+ * `NEXT_PUBLIC_CONSULT_TAX` via src/lib/tax-config.ts, so nothing in this file has to guess it.
  */
 export const feeTiers: FeeItem[] = [
   {
@@ -25,20 +28,21 @@ export const feeTiers: FeeItem[] = [
     approved: false,
   },
   {
-    service: "consultation",
-    publicLabel: "Consultation",
+    service: "consultation", // internal lookup key — see file header for why this stays stable
+    publicLabel: "Confidential consultation",
     priceType: "fixed",
-    amount: 150, // illustrative test-mode figure only — see file header comment
+    amount: 250,
     currency: "CAD",
-    taxNote: "Plus applicable tax",
+    // Static fallback only; the live label always comes from getConsultTaxConfig() at render time.
+    taxNote: "Tax treatment to be confirmed with Peter's accountant",
     inclusions: [
       "45–60 minute video or phone consultation",
       "A pathway map and key evidence gaps",
       "A written next-step summary",
     ],
     exclusions: ["Government, medical and translation fees", "Ongoing representation"],
-    effectiveDate: "2026-07-29",
-    approved: false,
+    effectiveDate: "2026-08-05",
+    approved: true,
   },
   {
     service: "guided-document-review",

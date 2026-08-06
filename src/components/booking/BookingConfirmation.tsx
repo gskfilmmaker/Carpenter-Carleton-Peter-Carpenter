@@ -16,6 +16,10 @@ export function BookingConfirmation({
   videoPlatform,
   slotStartUtc,
   joinUrl,
+  amountPaid,
+  currency,
+  receiptUrl,
+  finalizing,
   paid,
 }: {
   reference?: string;
@@ -24,6 +28,12 @@ export function BookingConfirmation({
   videoPlatform?: VideoPlatform | string;
   slotStartUtc?: string;
   joinUrl?: string;
+  amountPaid?: number;
+  currency?: string;
+  receiptUrl?: string;
+  /** True once Stripe confirms payment but before the webhook has finished creating the calendar
+   * event / join link — details below are shown as far as they're known, rather than blocking. */
+  finalizing?: boolean;
   paid?: boolean;
 }) {
   const visitorTz = typeof window !== "undefined" ? getBrowserTimeZone() : TORONTO_TZ;
@@ -34,8 +44,15 @@ export function BookingConfirmation({
         {paid ? "Payment confirmed" : "Request received"}
       </p>
       <h2 className="mt-2 font-serif text-2xl font-normal text-ink">
-        Thank you — your consultation request is confirmed
+        Thank you — your consultation {paid ? "is confirmed" : "request is confirmed"}
       </h2>
+
+      {finalizing && (
+        <p className="mt-3 rounded-xl bg-sage-pale p-4 text-sm text-ink-soft">
+          Your payment is confirmed. We&rsquo;re finalizing your meeting details now — you&rsquo;ll
+          receive an email with your join details shortly.
+        </p>
+      )}
 
       <dl className="mt-5 space-y-2 text-sm text-ink-soft">
         {reference && (
@@ -71,6 +88,22 @@ export function BookingConfirmation({
             </dd>
           </div>
         )}
+        {typeof amountPaid === "number" && (
+          <div className="flex gap-2">
+            <dt className="font-medium text-ink">Amount paid</dt>
+            <dd>
+              {currency ?? "CAD"} ${amountPaid.toFixed(2)}
+              {receiptUrl && (
+                <>
+                  {" · "}
+                  <a href={receiptUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                    View receipt
+                  </a>
+                </>
+              )}
+            </dd>
+          </div>
+        )}
       </dl>
 
       {meetingFormat === "video" && videoPlatform === "whatsapp" && (
@@ -87,7 +120,7 @@ export function BookingConfirmation({
           if anything changes.
         </p>
       )}
-      {meetingFormat === "video" && videoPlatform !== "whatsapp" && (
+      {meetingFormat === "video" && videoPlatform !== "whatsapp" && !finalizing && (
         <p className="mt-4 rounded-xl bg-sage-pale p-4 text-sm text-ink-soft">
           {joinUrl ? (
             <>
