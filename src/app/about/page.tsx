@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Section, Eyebrow } from "@/components/layout/Section";
 import { ButtonLink } from "@/components/ui/Button";
+import { MapleLeafIcon } from "@/components/ui/MapleLeafIcon";
 import { site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function AboutPage() {
     <>
       <Section className="pt-10 pb-0">
         <Eyebrow>
+          <MapleLeafIcon className="h-3.5 w-3.5 text-copper" />
           Regulated Canadian Immigration Consultant · {site.designation} #{site.collegeId}
         </Eyebrow>
         <h1 className="max-w-2xl font-serif text-3xl font-normal text-ink sm:text-4xl">
