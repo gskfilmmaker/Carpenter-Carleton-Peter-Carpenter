@@ -2,16 +2,22 @@
  * Firm identity, trust-bar copy and navigation — the single source of truth for contact details.
  * Never hard-code phone/email strings in components; import from here.
  *
- * `legalName`, `representativeName`, `collegeId` and `addressLine` remain placeholders pending
- * Peter's written approval — see docs/LAUNCH-INPUTS-CHECKLIST.md. `publicEmail`, `businessPhone`
- * and `businessWhatsApp` were supplied directly as real, current contact details and are safe to
- * publish. Peter's direct line and the internal-notification recipient list are intentionally NOT
- * exported here — this module is imported by client components, so anything on it ships in the
- * client bundle. Those two live server-only in src/lib/server/internal-contact.ts instead.
+ * `publicEmail`, `businessPhone` and `businessWhatsApp` were supplied directly as real, current
+ * contact details and are safe to publish. `legalName` and `addressLine` are now corroborated by
+ * the firm's live Google Business Profile (name, address) plus an independent directory listing
+ * for the address — see the inline notes below for what's still open. `collegeId` remains
+ * pending Peter's explicit display-approval, per docs/LAUNCH-INPUTS-CHECKLIST.md. Peter's direct
+ * line and the internal-notification recipient list are intentionally NOT exported here — this
+ * module is imported by client components, so anything on it ships in the client bundle. Those
+ * two live server-only in src/lib/server/internal-contact.ts instead.
  */
 
 export const site = {
-  legalName: "Carpenter & Carleton", // placeholder — confirm exact registered/marketing spelling
+  // Confirmed via the firm's Google Business Profile ("Carpenter & Carleton", Etobicoke, ON) —
+  // matches what was already live. Still worth a final cross-check against the exact name on the
+  // CICC public register before treating this as fully closed (register listings sometimes use a
+  // different employer-name spelling than public-facing marketing material).
+  legalName: "Carpenter & Carleton",
   representativeName: "Peter Carpenter",
   designation: "RCIC",
   collegeId: "R408495", // placeholder pending display-approval, per CICC public register lookup
@@ -29,9 +35,19 @@ export const site = {
   sensitiveDocsNotice:
     "Do not send passports, bank statements, immigration portal passwords or other sensitive documents through this form.",
   publicEmail: "info@carpentercarleton.ca",
+  // CONFLICT — NOT YET RESOLVED: this number was supplied directly as the real, current contact
+  // number and is kept as the live default. Third-party research turned up two other numbers for
+  // this firm — the Google Business Profile shows (905) 271-7733, and an independent directory
+  // listing shows (416) 252-7733 — that don't match this one or each other. Before public launch,
+  // confirm with Peter which number(s) are actually current: this may legitimately be a mobile/
+  // WhatsApp line kept separate from an office landline, or one of the other two may be stale.
   businessPhone: "+16478613970",
   businessWhatsApp: "+16478613970",
-  addressLine: "Greater Toronto Area, Ontario, Canada", // placeholder — exact office address pending approval
+  // Confirmed via the firm's Google Business Profile and corroborated by an independent directory
+  // listing (same address on both). Office hours are NOT yet published anywhere on the site —
+  // only a single data point ("opens 9am Monday") surfaced in research, which isn't enough to
+  // publish a full weekly schedule without guessing the rest.
+  addressLine: "3062 Lake Shore Blvd W, Etobicoke, ON M8V 4C9",
   serviceArea: "Greater Toronto Area, Ontario, Canada",
 
   // Transactional email routing — single source of truth, see src/lib/adapters/email.ts.

@@ -2,9 +2,11 @@ import { site } from "@/content/site";
 
 /**
  * ProfessionalService structured data using only confirmed NAP fields (build brief section 9:
- * "only after business NAP... is confirmed" — email/phone here are confirmed; legalName/address
- * remain placeholders so this intentionally omits `address` rather than publish an unverified one).
- * No aggregate-rating markup, per the brief's explicit prohibition.
+ * "only after business NAP... is confirmed"). `address` is now included since `site.addressLine`
+ * is corroborated by the firm's Google Business Profile and an independent directory listing (see
+ * src/content/site.ts). `telephone` still carries the open phone-number discrepancy noted there —
+ * revisit once Peter confirms which number is current. No aggregate-rating markup, per the brief's
+ * explicit prohibition.
  */
 export function StructuredData() {
   const json = {
@@ -13,8 +15,16 @@ export function StructuredData() {
     name: site.legalName,
     email: site.publicEmail,
     telephone: site.businessPhone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "3062 Lake Shore Blvd W",
+      addressLocality: "Etobicoke",
+      addressRegion: "ON",
+      postalCode: "M8V 4C9",
+      addressCountry: "CA",
+    },
     areaServed: site.serviceArea,
-    url: "https://www.canadaimmigrationhelp.ca",
+    url: "https://carpentercarleton.ca",
     sameAs: [site.ciccRegisterUrl],
   };
 

@@ -13,10 +13,22 @@ See build brief section 12 and master-plan section 10 for the source requirement
 - [ ] **Peter's approved RCIC display wording, license number and CICC register link
       presentation.** Currently shown: "Peter Carpenter, RCIC — College ID R408495" with a link to
       the CICC Public Register. Confirm exact wording.
-- [x] **Public email, phone and WhatsApp number** — supplied directly and wired sitewide via
-      `src/content/site.ts` (`info@carpentercarleton.ca`, `+1 647 861 3970`). Still open: **exact
-      office address** and **hours** (`site.addressLine` remains a placeholder), and confirmation
-      that publishing the phone/WhatsApp number as given is approved for public use.
+- [x] **Public email and office address** — `info@carpentercarleton.ca` and `3062 Lake Shore Blvd
+      W, Etobicoke, ON M8V 4C9` (`src/content/site.ts`), the address corroborated by the firm's
+      Google Business Profile and an independent directory listing. Also now included in the
+      `ProfessionalService` structured data (`src/components/seo/StructuredData.tsx`).
+- [ ] **Phone number conflict — unresolved, do not launch without fixing.** The site currently
+      publishes `+1 647 861 3970` for both calls and WhatsApp (previously supplied as "real,
+      current"). Research for this checklist turned up two *different* numbers for the same firm:
+      the Google Business Profile shows `(905) 271-7733`, and an independent directory listing
+      shows `(416) 252-7733`. All three could be legitimate (e.g. a WhatsApp/mobile line kept
+      separate from an office landline), or one or two may be stale — **confirm with Peter which
+      number(s) are current before launch**, then update `site.businessPhone` /
+      `site.businessWhatsApp` in `src/content/site.ts` accordingly.
+- [ ] **Office hours.** Not published anywhere on the site yet. Only one data point surfaced in
+      research ("opens 9am Monday") — not enough to publish a full weekly schedule. Get the
+      complete hours from Peter, then add them to the footer/About page and as
+      `openingHoursSpecification` in the structured data.
 - [ ] **Peter's direct line — confirm it should stay unpublished.** Stored server-only in
       `src/lib/server/internal-contact.ts`, gated by `SHOW_SECONDARY_PHONE` (default off). Nothing
       in the current UI renders it. Confirm this is the intended posture before any internal/staff
