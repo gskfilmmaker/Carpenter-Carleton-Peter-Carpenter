@@ -35,13 +35,10 @@ export const site = {
   sensitiveDocsNotice:
     "Do not send passports, bank statements, immigration portal passwords or other sensitive documents through this form.",
   publicEmail: "info@carpentercarleton.ca",
-  // CONFLICT — NOT YET RESOLVED: this number was supplied directly as the real, current contact
-  // number and is kept as the live default. Third-party research turned up two other numbers for
-  // this firm — the Google Business Profile shows (905) 271-7733, and an independent directory
-  // listing shows (416) 252-7733 — that don't match this one or each other. Before public launch,
-  // confirm with Peter which number(s) are actually current: this may legitimately be a mobile/
-  // WhatsApp line kept separate from an office landline, or one of the other two may be stale.
-  businessPhone: "+16478613970",
+  // Phone-number conflict resolved by Peter (2026-08-08): the Google Business Profile number,
+  // (905) 271-7733, is not in service — do not use it. The working office line is (416) 252-7733;
+  // the WhatsApp/mobile line stays separate at +1 647 861 3970 (unchanged, still the live number).
+  businessPhone: "+14162527733",
   businessWhatsApp: "+16478613970",
   // Confirmed via the firm's Google Business Profile and corroborated by an independent directory
   // listing (same address on both). Office hours are NOT yet published anywhere on the site —

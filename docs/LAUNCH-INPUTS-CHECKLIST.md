@@ -17,14 +17,14 @@ See build brief section 12 and master-plan section 10 for the source requirement
       W, Etobicoke, ON M8V 4C9` (`src/content/site.ts`), the address corroborated by the firm's
       Google Business Profile and an independent directory listing. Also now included in the
       `ProfessionalService` structured data (`src/components/seo/StructuredData.tsx`).
-- [ ] **Phone number conflict — unresolved, do not launch without fixing.** The site currently
-      publishes `+1 647 861 3970` for both calls and WhatsApp (previously supplied as "real,
-      current"). Research for this checklist turned up two *different* numbers for the same firm:
-      the Google Business Profile shows `(905) 271-7733`, and an independent directory listing
-      shows `(416) 252-7733`. All three could be legitimate (e.g. a WhatsApp/mobile line kept
-      separate from an office landline), or one or two may be stale — **confirm with Peter which
-      number(s) are current before launch**, then update `site.businessPhone` /
-      `site.businessWhatsApp` in `src/content/site.ts` accordingly.
+- [x] **Phone number conflict — resolved by Peter (2026-08-08).** The Google Business Profile
+      number, `(905) 271-7733`, is not in service. Confirmed working numbers: office/call line
+      `(416) 252-7733` (`site.businessPhone`) and WhatsApp/mobile `+1 647 861 3970`
+      (`site.businessWhatsApp`, unchanged) — both wired in `src/content/site.ts` and used sitewide
+      (footer, sticky CTA, contact channels, booking confirmation, structured data). The stale
+      Google Business Profile listing itself should still be corrected/claimed at some point so it
+      stops showing the dead number to people who find the firm via Google Maps/Search, but that's
+      outside this codebase.
 - [ ] **Office hours.** Not published anywhere on the site yet. Only one data point surfaced in
       research ("opens 9am Monday") — not enough to publish a full weekly schedule. Get the
       complete hours from Peter, then add them to the footer/About page and as
