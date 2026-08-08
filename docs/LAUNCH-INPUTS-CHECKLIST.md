@@ -75,8 +75,12 @@ See build brief section 12 and master-plan section 10 for the source requirement
 - [ ] **Final approved biography, headshot and brand assets** for the About page.
 - [ ] **Approved languages and qualified translation/review process** before any non-English
       content ships.
-- [ ] **Privacy policy, cookie policy, retention policy and consent wording** — `/privacy` is a
-      placeholder pending this input.
+- [x] **Privacy policy, cookie policy, retention policy and consent wording** — `/privacy` now has
+      real, code-accurate content (real form fields collected, real sub-processor list, an honest
+      cookies section reflecting that no tracking is actually live yet, PIPEDA-consistent rights
+      language). Still marked "Draft" on-page and needs Peter's/legal counsel's final sign-off
+      before that badge comes off — this is a good-faith description of what the site does, not a
+      lawyer-reviewed policy.
 - [ ] **CRM and secure client-document portal.** Not yet built (no CRM lead-sync adapter or
       authenticated document upload exists — booking/contact submissions currently only trigger
       email notifications, with no persistence layer / database in this environment).
