@@ -1,6 +1,6 @@
 # Implementation Plan — Carpenter & Carleton Immigration Platform
 
-**Status:** Phase 1 complete; Phase 2 (conversion system) complete
+**Status:** Phase 1 complete; Phase 2 (conversion system) complete; Phase 2b (payments finalization, real transactional email, test infrastructure) complete
 **Source brief:** `Claude Code — Premium Immigration Website Build Brief v1.0` + `Market & Website Master Plan`
 
 This document is the first deliverable required by the build brief (section 0). It records the
@@ -19,7 +19,7 @@ security plan, then defines build phases with acceptance tests. It will be updat
 | Forms | **React Hook Form + Zod** | Accessible client validation paired with a server-side Zod re-validation in the API route (never trust client validation alone). |
 | Content model | **Typed local content modules** (`src/content/*.ts`) implementing the exact types from brief section 8 (`Service`, `Resource`, `Testimonial`, `FeeItem`, `ApprovalRecord`) | A real headless CMS (Sanity) requires a project/dataset/API token this environment cannot provision or validate. Shipping the identical TypeScript content shape now means swapping in Sanity (or Contentlayer/MDX) later is a data-source change, not an architecture change. This is called out as a launch input in section 12. |
 | Email/Calendar/Analytics | **Adapter interfaces with a no-op/dev implementation** (`src/lib/adapters/*`) | Brief explicitly allows "placeholder adapter... once credentials are available." No real provider secrets exist in this environment. |
-| Testing | **ESLint, `tsc --noEmit`, `next build`**, plus targeted unit tests (Vitest) for form/validation and route-rule logic | Playwright/Axe E2E is listed as a later-phase acceptance item once the conversion flows are complete; Chromium is preinstalled in this environment for when that lands. |
+| Testing | **ESLint, `tsc --noEmit`, `next build`, Vitest** (`npm test` — 33 tests across statement-descriptor/tax-config/timezone-DST/validation-schema/site-config coverage) **and Playwright + `@axe-core/playwright`** (`npm run test:e2e` — accessibility + keyboard-navigation pass on `/book`, `/book/confirmation`, `/contact`, `/privacy`, using the environment's preinstalled Chromium at `/opt/pw-browsers/chromium`) | The Axe pass caught a real WCAG AA color-contrast failure (the `--color-muted` token and one footer text color) during Phase 2b — both fixed, not suppressed; see section 5. |
 | Deployment | Unspecified (Vercel-compatible) | No hosting credentials exist yet; the app has zero Vercel-specific code lock-in. |
 
 No existing stack was found in the repo (it was empty), so this is a fresh choice per the brief's
@@ -118,9 +118,9 @@ drifted from what's documented below.
 |---|---|---|
 | Sanity (or chosen CMS) project/token | **Not provisioned** | Content ships as typed local modules now; swap-in point documented above. |
 | Cal.com | **Adapter built, real API wired, credentials not provisioned** | `src/lib/adapters/calendar.ts` calls Cal.com v2's `/slots` and `/bookings` endpoints per their publicly documented shape. Their docs/API returned HTTP 403 to this environment's outbound fetcher (bot protection), so exact current field names could not be double-checked live — verify against a real Cal.com sandbox before enabling in production. Falls back safely to the dev slot generator either way. |
-| Resend (transactional email) | **Adapter built, real API wired, credentials not provisioned** | `src/lib/adapters/email.ts` posts to `api.resend.com/emails` (including `scheduled_at` for the 3-email pre-consultation sequence) once `RESEND_API_KEY` is set; the dev adapter logs only the template name otherwise. |
+| Resend (transactional email) | **Adapter built, real API wired, credentials not provisioned** | `src/lib/adapters/email.ts` posts to `api.resend.com/emails` (including `scheduled_at` for the legacy 3-email pre-consultation sequence) once `RESEND_API_KEY` is set; sends "from" `info@carpentercarleton.ca` / reply-to same, to both the client and — for paid bookings — `getInternalNotificationRecipients()` (`info@carpentercarleton.ca` + `carpenter@bellnet.ca`, server-only, see section 5). If a send fails (most likely: the domain isn't verified in Resend yet), it automatically retries once from Resend's sandbox sender (`onboarding@resend.dev`) and logs a warning — never a silent drop. The dev adapter (no key set) logs only the template name and recipient count, never an address or body. |
 | Cloudflare Turnstile | **Client + server code built, keys not provisioned** | `src/components/forms/Turnstile.tsx` renders nothing without `NEXT_PUBLIC_TURNSTILE_SITE_KEY`; `src/lib/turnstile.ts` treats verification as passed without `TURNSTILE_SECRET_KEY`. Forms currently rely on the honeypot field + a render-to-submit timing check + the in-memory rate limiter. |
-| Stripe | **Checkout + webhook built, gated off** | `src/lib/payments.ts` requires both `PAYMENTS_ENABLED=true` and the relevant `FeeItem.approved === true` before any Checkout session is created; either gate closed keeps every booking request-only ("Fee confirmed in writing before any representation begins."). Webhook signature is verified server-side (`STRIPE_WEBHOOK_SECRET`) before any confirmation is sent — payment is never inferred from the client redirect alone. Apple Pay/Google Pay come free via Stripe Checkout's built-in wallet detection, no extra integration. |
+| Stripe | **Checkout + webhook built and exercised (error paths only — no real test-mode charge could be run, see section 6)** | Single GSK Productions Inc. account, GSK as merchant of record — **not** Stripe Connect, no connected-accounts/onboarding/transfer code exists. `src/lib/payments.ts` requires both `PAYMENTS_ENABLED=true` and the relevant `FeeItem.approved === true` before any Checkout session is created (the `consultation` tier is `amount: 250, approved: true` per explicit instruction — see `docs/LAUNCH-INPUTS-CHECKLIST.md`); either gate closed keeps every booking request-only ("Fee confirmed in writing before any representation begins."). Every Checkout Session sets `payment_intent_data.statement_descriptor` to `getStatementDescriptor()` (default `"CARPENTER CARLETON"`, sanitized/truncated per Stripe's rules in `src/lib/statement-descriptor.ts`) so the charge doesn't show as "GSK" on the client's card statement, and `receipt_email` so Stripe emails its own receipt too. Tax is a separate line item computed from `NEXT_PUBLIC_CONSULT_TAX` (`src/lib/tax-config.ts`) when it parses a percentage, otherwise no tax line is added and the UI/emails show a "to be confirmed" note — nothing is guessed. The webhook (`checkout.session.completed`) is idempotent on the Stripe session id (`src/lib/booking-store.ts`, in-memory) — a duplicate delivery is a no-op — and is the **only** place a booking is finalized: the calendar event, join link, and both confirmation emails are created there, never at Checkout-session-creation time, so a browser back-button or abandoned checkout never books or emails anything. Apple Pay/Google Pay come free via Stripe Checkout's built-in wallet detection, no extra integration. |
 | GA4 / PostHog | **Not provisioned** | No analytics script ships until a consent-managed provider + key exists; event names from brief §9 (plus `click_whatsapp`, `select_slot`, `select_meeting_format` added in Phase 2) are defined as constants ready to wire up. |
 | Domain/hosting | **Not provisioned** | Out of scope for this repo. |
 
@@ -156,9 +156,16 @@ All of the above are also tracked in `docs/LAUNCH-INPUTS-CHECKLIST.md`.
 - Stripe secret key and webhook secret never reach the client bundle (verified against the built
   `.next/static` output); Checkout is created server-side and the browser only ever receives a
   redirect URL. The webhook route verifies `stripe-signature` against the raw request body before
-  trusting any event.
-- Peter's secondary phone number is exported only from a `server-only`-guarded module and is not
-  rendered anywhere in the current UI — see `docs/LAUNCH-INPUTS-CHECKLIST.md`.
+  trusting any event, and is idempotent on the Stripe session id so a retried delivery can't
+  double-book or double-email (`src/lib/booking-store.ts`).
+- Peter's secondary phone number **and** the internal-notification recipient list
+  (`carpenter@bellnet.ca`) are exported only from `src/lib/server/internal-contact.ts`
+  (`server-only`-guarded) rather than the shared `site` config — an Axe/bundle audit during Phase 2b
+  caught `carpenter@bellnet.ca` leaking into a client chunk when it briefly lived on `site` instead
+  (that object is imported by client components like the header/footer, so anything on it ships
+  client-side even if never rendered). Fixed by moving it; a `grep` against `.next/static` after the
+  fix confirms it no longer appears. This is the general rule for anything internal-only added to
+  this codebase going forward: if it has no client-side purpose, it does not belong on `site`.
 - No Government of Canada / CICC logos or crests anywhere; CICC Public Register is a plain text link.
 
 ---
@@ -196,6 +203,42 @@ Confirmed via `grep` against `.next/static` that neither `STRIPE_SECRET_KEY` nor
 number appear in the client bundle. Deferred to Phase 4 (not yet run): Playwright + Axe automated
 pass — see `docs/LAUNCH-INPUTS-CHECKLIST.md` for the credentials Phase 2's real integrations still
 need before they're live (Cal.com, Resend, Turnstile, Stripe).
+
+### Phase 2b — Payments finalization, real transactional email & test infrastructure (this PR)
+Flips the consultation fee to the real $250 CAD figure (`approved: true`, per explicit
+instruction); reorders the booking flow so the calendar event, join link and confirmation emails
+are only ever created by the webhook after Stripe confirms payment (previously the calendar
+reservation happened before payment); adds a per-charge Stripe statement descriptor
+(`"CARPENTER CARLETON"`, sanitized against Stripe's character/length rules) so charges from GSK's
+single Stripe account are recognizable to the client rather than showing as "GSK"; adds an
+env-driven, never-guessed tax line (`NEXT_PUBLIC_CONSULT_TAX`); makes the webhook idempotent on the
+Stripe session id; wires a real Resend integration (verified-domain sender with an automatic
+sandbox-sender fallback and warning log, dual-recipient internal notifications, richer client
+confirmation copy); adds the "Site managed by GSK Productions Inc." footer credit and a truthful
+GSK-as-payment-processor disclosure on `/privacy`; and sets up real test infrastructure (Vitest unit
+tests, Playwright + Axe accessibility tests) where none existed before.
+
+**Acceptance:** `npm run lint`, `npx tsc --noEmit`, `npm test` (33/33 passing) and
+`npm run test:e2e` (8/8 passing, including a full Axe pass on `/book`, `/book/confirmation`,
+`/contact`, `/privacy`) all pass, alongside `npm run build` (33 routes). A `grep` against the built
+`.next/static` output confirms no Stripe secret, no Resend key, and no internal-only contact detail
+(`carpenter@bellnet.ca`) reaches the client bundle. The Axe pass surfaced and led to fixing one real
+pre-existing WCAG AA contrast failure (`--color-muted` token, 4.28:1 → 5.86:1 against white) and one
+introduced by this phase's own new footer line (`text-slate-500` → `text-slate-400`, 3.07:1 →
+5.71:1 against `bg-ink`) — both confirmed via a computed-contrast check, not just re-running Axe
+once.
+
+**What could not be verified in this sandbox, and why:** end-to-end Stripe test-card charges. No
+live (even test-mode) Stripe API keys exist in this environment, and this sandbox's outbound network
+goes through a proxy with no Stripe credentials configured. What *was* verified: the code compiles
+and typechecks; the dev-fallback (no-payment) booking path works end-to-end against the running
+production build; feeding a syntactically-valid-but-fake `STRIPE_SECRET_KEY` exercises the Checkout
+Session creation code path and confirms it fails closed (500 with a clean user-facing error, no
+crash, no partial booking) rather than silently succeeding; the webhook correctly rejects a request
+with no valid signature. A real test-mode charge — confirming the statement descriptor actually
+appears on the resulting PaymentIntent, the tax line renders as expected, and the full
+payment→webhook→calendar→dual-email chain fires — needs to be run by whoever has real Stripe test
+keys, ideally in a staging deployment before going anywhere near live keys.
 
 ### Phase 3 — Editorial authority
 Full content for all remaining service pages, Policy Desk articles, FAQs, internal linking, SEO

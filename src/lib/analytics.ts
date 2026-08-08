@@ -19,6 +19,8 @@ export const analyticsEvents = {
   clickCiccVerify: "click_cicc_verify",
   selectSlot: "select_slot",
   selectMeetingFormat: "select_meeting_format",
+  paymentStarted: "payment_started",
+  paymentSucceeded: "payment_succeeded",
 } as const;
 
 export type AnalyticsEvent = (typeof analyticsEvents)[keyof typeof analyticsEvents];

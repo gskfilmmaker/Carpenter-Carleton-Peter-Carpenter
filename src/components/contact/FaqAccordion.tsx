@@ -1,6 +1,23 @@
 import { site } from "@/content/site";
+import { feeTiers } from "@/content/fees";
+import { getConsultTaxConfig, computeTaxAmount } from "@/lib/tax-config";
 
 type Faq = { question: string; answer: string };
+
+const consultationFee = feeTiers.find((tier) => tier.service === "consultation");
+
+function costAnswer(): string {
+  if (consultationFee?.approved && consultationFee.amount) {
+    const tax = getConsultTaxConfig();
+    const taxAmount = computeTaxAmount(consultationFee.amount, tax);
+    const totalLine =
+      taxAmount > 0
+        ? ` plus ${tax.label} (${consultationFee.currency} $${taxAmount.toFixed(2)}), ${consultationFee.currency} $${(consultationFee.amount + taxAmount).toFixed(2)} total`
+        : ` (${tax.label})`;
+    return `A ${consultationFee.publicLabel.toLowerCase()} is ${consultationFee.currency} $${consultationFee.amount.toFixed(2)}${totalLine}. ${site.noGuaranteeNotice}`;
+  }
+  return `Our approved fee schedule is being finalized — see the Fees page for the current structure. ${site.noGuaranteeNotice}`;
+}
 
 const defaultFaqs: Faq[] = [
   {
@@ -9,7 +26,7 @@ const defaultFaqs: Faq[] = [
   },
   {
     question: "What does a consultation cost, and are outcomes guaranteed?",
-    answer: `Our approved fee schedule is being finalized — see the Fees page for the current structure. ${site.noGuaranteeNotice}`,
+    answer: costAnswer(),
   },
   {
     question: "What should I prepare before we talk?",

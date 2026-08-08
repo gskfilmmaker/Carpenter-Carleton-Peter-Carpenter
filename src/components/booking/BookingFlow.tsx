@@ -7,6 +7,7 @@ import type { MeetingFormat, TimeSlot, VideoPlatform } from "@/lib/adapters/cale
 import { videoPlatforms } from "@/lib/adapters/calendar";
 import { commonTimezones, formatInTimeZone, getBrowserTimeZone, TORONTO_TZ } from "@/lib/timezone";
 import { feeTiers } from "@/content/fees";
+import { computeTaxAmount, getConsultTaxConfig } from "@/lib/tax-config";
 import { features, site } from "@/content/site";
 import { Button } from "@/components/ui/Button";
 import { Turnstile } from "@/components/forms/Turnstile";
@@ -149,6 +150,7 @@ export function BookingFlow() {
 
       if (data.checkoutUrl) {
         setStatus("redirecting");
+        track(analyticsEvents.paymentStarted, { consultationType });
         window.location.href = data.checkoutUrl;
         return;
       }
@@ -270,9 +272,20 @@ export function BookingFlow() {
 
           {consultationFee && (
             <p className="mt-2 text-sm text-muted">
-              {consultationFee.approved && consultationFee.amount
-                ? `${consultationFee.publicLabel}: ${consultationFee.currency} $${consultationFee.amount}${consultationFee.taxNote ? ` (${consultationFee.taxNote})` : ""}`
-                : `${consultationFee.publicLabel} — fee confirmed in writing before any representation begins.`}
+              {consultationFee.approved && consultationFee.amount ? (
+                <>
+                  {consultationFee.publicLabel}: {consultationFee.currency} ${consultationFee.amount.toFixed(2)}
+                  {(() => {
+                    const tax = getConsultTaxConfig();
+                    const taxAmount = computeTaxAmount(consultationFee.amount, tax);
+                    return taxAmount > 0
+                      ? ` + ${tax.label} (${consultationFee.currency} $${taxAmount.toFixed(2)}) = ${consultationFee.currency} $${(consultationFee.amount + taxAmount).toFixed(2)} total`
+                      : ` (${tax.label})`;
+                  })()}
+                </>
+              ) : (
+                `${consultationFee.publicLabel} — fee confirmed in writing before any representation begins.`
+              )}
             </p>
           )}
 
@@ -411,7 +424,13 @@ export function BookingFlow() {
 
           <div className="mt-6">
             <Button onClick={submitBooking} disabled={status === "submitting" || status === "redirecting"}>
-              {status === "redirecting" ? "Redirecting to payment…" : status === "submitting" ? "Booking…" : "Request this time"}
+              {status === "redirecting"
+                ? "Redirecting to payment…"
+                : status === "submitting"
+                  ? "Starting checkout…"
+                  : consultationFee?.approved && consultationFee.amount
+                    ? "Continue to payment"
+                    : "Request this time"}
             </Button>
           </div>
         </div>

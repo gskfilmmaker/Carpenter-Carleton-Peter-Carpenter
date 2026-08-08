@@ -1,27 +1,37 @@
 import "server-only";
 import { site } from "@/content/site";
+import { formatInTimeZone, TORONTO_TZ } from "@/lib/timezone";
 
 /**
  * Transactional email adapter interface (build brief section 8/12: "Resend (or provider adapter)").
- * `resendEmailAdapter` is a real, working Resend integration used automatically once
+ * `createResendAdapter` is a real, working Resend integration used automatically once
  * RESEND_API_KEY is set; with no key configured (the default in this environment), `devEmailAdapter`
  * logs only non-PII metadata — never a recipient address or message body — and sends nothing.
  * Every call site is written against the `EmailAdapter` interface, so nothing else needs to change
  * when a real key is added.
+ *
+ * IMPORTANT — domain verification: sending "from" info@carpentercarleton.ca only works once that
+ * domain is verified in the Resend dashboard (Domains → Add Domain → add the SPF/DKIM/DMARC
+ * records Resend generates — see docs/LAUNCH-INPUTS-CHECKLIST.md for the record types and why the
+ * exact DKIM value can't be written here). Until then, every send from the real domain will fail;
+ * this adapter catches that, logs a loud warning, and retries once from Resend's shared sandbox
+ * sender (`onboarding@resend.dev`) so mail is never silently dropped — it just won't look like it
+ * came from carpentercarleton.ca until the domain is verified.
  */
 
 export type EmailTemplate =
   | "contact-enquiry" // internal notification to staff
   | "contact-receipt" // confirmation to the visitor who submitted /contact
   | "callback-request" // internal notification to staff
-  | "booking-confirmation"
+  | "booking-confirmation" // client-facing, sent only after webhook-confirmed payment
+  | "booking-internal-notification" // to internalNotificationRecipients, may contain PII
   | "booking-prep-guide"
   | "booking-representation-explainer"
   | "pathway-check-summary"
   | "resource-download";
 
 export type EmailMessage = {
-  to: string;
+  to: string | string[];
   template: EmailTemplate;
   data: Record<string, unknown>;
   /** RFC3339 timestamp — schedules a future send via Resend's `scheduledAt`. Ignored by the dev adapter. */
@@ -34,8 +44,9 @@ export interface EmailAdapter {
 
 export const devEmailAdapter: EmailAdapter = {
   async send(message) {
+    const recipientCount = Array.isArray(message.to) ? message.to.length : 1;
     console.log(
-      `[email:dev-adapter] would send "${message.template}" template${
+      `[email:dev-adapter] would send "${message.template}" template to ${recipientCount} recipient(s)${
         message.scheduledAt ? ` (scheduled ${message.scheduledAt})` : ""
       } — no provider configured`
     );
@@ -47,12 +58,44 @@ const subjects: Record<EmailTemplate, string> = {
   "contact-enquiry": "New enquiry from the website",
   "contact-receipt": "We received your message",
   "callback-request": "New call-back request from the website",
-  "booking-confirmation": "Your consultation request",
+  "booking-confirmation": "Your consultation is confirmed",
+  "booking-internal-notification": "New paid consultation booking",
   "booking-prep-guide": "What to prepare for your consultation",
   "booking-representation-explainer": "How representation works",
   "pathway-check-summary": "Your Canada Pathway Readiness summary",
   "resource-download": "Your requested guide",
 };
+
+const platformLabels: Record<string, string> = {
+  teams: "Microsoft Teams",
+  zoom: "Zoom",
+  meet: "Google Meet",
+  whatsapp: "WhatsApp video",
+};
+
+function formatMeetingLine(data: Record<string, unknown>): string {
+  const meetingFormat = String(data.meetingFormat ?? "");
+  const videoPlatform = data.videoPlatform ? String(data.videoPlatform) : undefined;
+
+  if (meetingFormat === "video" && videoPlatform === "whatsapp") {
+    return `Format: WhatsApp video — we will call ${data.phone ? String(data.phone) : "the number you provided"} at the scheduled time.`;
+  }
+  if (meetingFormat === "video" && videoPlatform) {
+    const label = platformLabels[videoPlatform] ?? videoPlatform;
+    return `Format: ${label}${data.joinUrl ? `\nJoin link: ${data.joinUrl}` : " — your join link will follow separately if it is not shown above."}`;
+  }
+  if (meetingFormat === "in-person") return "Format: In person.";
+  return "Format: Phone — we will call you at the scheduled time.";
+}
+
+function formatWhenLines(data: Record<string, unknown>): string {
+  const slotStartUtc = data.slotStartUtc ? String(data.slotStartUtc) : undefined;
+  if (!slotStartUtc) return "";
+  const visitorTz = data.visitorTimeZone ? String(data.visitorTimeZone) : undefined;
+  const torontoLine = `${formatInTimeZone(slotStartUtc, TORONTO_TZ)} (Toronto time)`;
+  const visitorLine = visitorTz && visitorTz !== TORONTO_TZ ? `\n${formatInTimeZone(slotStartUtc, visitorTz)} (your time)` : "";
+  return `When: ${torontoLine}${visitorLine}`;
+}
 
 /** Quiet, elegant plain-text bodies — no pressure tactics, no outcome claims. */
 function bodyFor(template: EmailTemplate, data: Record<string, unknown>): string {
@@ -63,8 +106,58 @@ function bodyFor(template: EmailTemplate, data: Record<string, unknown>): string
       return `Thank you for reaching out to ${site.legalName}. We aim to respond within one business day.\n\n${site.noGuaranteeNotice}\n\n${site.sensitiveDocsNotice}`;
     case "callback-request":
       return `A new call-back request was submitted on the website.\n\n${JSON.stringify(data, null, 2)}`;
-    case "booking-confirmation":
-      return `Thank you for booking a consultation.\n\nReference: ${data.reference ?? ""}\nConsultation type: ${data.consultationType ?? ""}\n\nWe will follow up shortly to confirm details.\n\n${site.noGuaranteeNotice}\n\n${site.sensitiveDocsNotice}`;
+
+    case "booking-confirmation": {
+      const amountLine =
+        typeof data.amountPaid === "number"
+          ? `Amount paid: ${data.currency ?? "CAD"} $${data.amountPaid.toFixed(2)}`
+          : undefined;
+      const receiptLine = data.receiptUrl ? `Receipt: ${data.receiptUrl}` : undefined;
+      return [
+        `Thank you — your consultation is confirmed.`,
+        ``,
+        `Reference: ${data.reference ?? ""}`,
+        `Consultation type: ${data.consultationType ?? ""}`,
+        formatWhenLines(data),
+        formatMeetingLine(data),
+        amountLine,
+        receiptLine,
+        ``,
+        `What to prepare: a short summary of your situation and any relevant dates.`,
+        `Cancelling or rescheduling: reply to this email and we'll find a new time — there's no charge for rescheduling with reasonable notice.`,
+        ``,
+        site.noGuaranteeNotice,
+        site.sensitiveDocsNotice,
+        ``,
+        `Verify on the CICC Public Register: ${site.ciccRegisterUrl}`,
+        `Learn about representatives (IRCC): ${site.representativeInfoUrl}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
+
+    case "booking-internal-notification": {
+      const amountLine =
+        typeof data.amountPaid === "number"
+          ? `Amount paid: ${data.currency ?? "CAD"} $${data.amountPaid.toFixed(2)}`
+          : "Amount paid: (request-only, no payment)";
+      return [
+        `New consultation booking — payment ${data.paymentStatus ?? "unknown"}.`,
+        ``,
+        `Reference: ${data.reference ?? ""}`,
+        `Client: ${data.name ?? ""} <${data.email ?? ""}>${data.phone ? ` — ${data.phone}` : ""}`,
+        `Consultation type: ${data.consultationType ?? ""}`,
+        formatWhenLines(data),
+        formatMeetingLine(data),
+        amountLine,
+        data.receiptUrl ? `Receipt: ${data.receiptUrl}` : undefined,
+        data.calendarOk === false ? `ACTION NEEDED: calendar/video-link creation failed — confirm the meeting manually.` : undefined,
+        data.message ? `\nClient note:\n${data.message}` : undefined,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
+
     case "booking-prep-guide":
       return `A little before your consultation, here is what helps us make the most of the time: a short written summary of your situation, any relevant dates, and general document categories (not the documents themselves) you think may be relevant. ${site.sensitiveDocsNotice}`;
     case "booking-representation-explainer":
@@ -76,30 +169,52 @@ function bodyFor(template: EmailTemplate, data: Record<string, unknown>): string
   }
 }
 
+const SANDBOX_FROM = "onboarding@resend.dev";
+
 function createResendAdapter(apiKey: string): EmailAdapter {
+  async function attempt(fromAddress: string, message: EmailMessage) {
+    return fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: `${site.legalName} <${fromAddress}>`,
+        to: message.to,
+        reply_to: site.emailReplyTo,
+        subject: subjects[message.template],
+        text: bodyFor(message.template, message.data),
+        ...(message.scheduledAt ? { scheduled_at: message.scheduledAt } : {}),
+      }),
+    });
+  }
+
   return {
     async send(message) {
       try {
-        const response = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: `${site.legalName} <${site.publicEmail}>`,
-            to: message.to,
-            subject: subjects[message.template],
-            text: bodyFor(message.template, message.data),
-            ...(message.scheduledAt ? { scheduled_at: message.scheduledAt } : {}),
-          }),
-        });
+        let response = await attempt(site.emailFrom, message);
+
         if (!response.ok) {
           const errorBody = await response.text().catch(() => "");
-          return { ok: false, error: `Resend request failed: ${response.status} ${errorBody}` };
+          console.warn(
+            `[email:resend] send from ${site.emailFrom} failed (${response.status}) — is carpentercarleton.ca verified in Resend? Retrying with sandbox sender.`,
+            errorBody
+          );
+          response = await attempt(SANDBOX_FROM, message);
+
+          if (!response.ok) {
+            const fallbackError = await response.text().catch(() => "");
+            console.error(`[email:resend] sandbox-sender retry also failed (${response.status})`, fallbackError);
+            return { ok: false, error: `Resend failed on both domain and fallback sender: ${response.status} ${fallbackError}` };
+          }
+
+          console.warn(`[email:resend] delivered "${message.template}" via sandbox sender — verify the domain to send as ${site.emailFrom}.`);
         }
+
         return { ok: true };
       } catch (error) {
+        console.error(`[email:resend] send threw for template "${message.template}"`, error);
         return { ok: false, error: error instanceof Error ? error.message : "Unknown email error" };
       }
     },
@@ -111,10 +226,11 @@ export const emailAdapter: EmailAdapter = process.env.RESEND_API_KEY
   : devEmailAdapter;
 
 /**
- * The 3-email pre-consultation sequence from build brief section 6.4 / Phase-2 UX ask: booking
- * confirmation immediately, a "what to prepare" note the next morning, and a short
- * "how representation works" note the day before. Uses Resend's `scheduledAt` when a real
- * provider is configured; the dev adapter just logs the intended schedule.
+ * The dev-fallback-only pre-consultation sequence used when payments aren't live (no Stripe keys
+ * in this environment): booking confirmation immediately, a "what to prepare" note the next
+ * morning, and a short "how representation works" note the day before. Once payments are live, the
+ * webhook-triggered "booking-confirmation" email (src/app/api/webhooks/stripe/route.ts) is the
+ * real transactional trigger and already contains everything this sequence's first email does.
  */
 export async function sendPreConsultationSequence(params: {
   to: string;
@@ -127,7 +243,7 @@ export async function sendPreConsultationSequence(params: {
   await emailAdapter.send({
     to,
     template: "booking-confirmation",
-    data: { reference, consultationType },
+    data: { reference, consultationType, slotStartUtc: consultationAtUtc },
   });
 
   const prepAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();

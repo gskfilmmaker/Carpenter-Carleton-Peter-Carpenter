@@ -1,6 +1,7 @@
 import "server-only";
 import Stripe from "stripe";
 import type { FeeItem } from "@/content/types";
+import { DEFAULT_STATEMENT_DESCRIPTOR, sanitizeStatementDescriptor } from "@/lib/statement-descriptor";
 
 /**
  * Payments stay OFF (request-only booking, no charge) unless BOTH gates are open:
@@ -26,4 +27,15 @@ export function getStripeClient(): Stripe | null {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   stripeClient = secretKey ? new Stripe(secretKey) : null;
   return stripeClient;
+}
+
+/**
+ * This account (a single GSK Productions Inc. Stripe account, GSK as merchant of record — not
+ * Stripe Connect) would otherwise show "GSK" on the client's card statement; setting this
+ * per-charge is what makes the charge recognizable as Carpenter & Carleton instead, which is the
+ * whole point (fewer confused-charge chargebacks). See src/lib/statement-descriptor.ts for the
+ * sanitization rules (kept in a separate, non-`server-only` module so it's unit-testable).
+ */
+export function getStatementDescriptor(): string {
+  return sanitizeStatementDescriptor(process.env.STATEMENT_DESCRIPTOR || DEFAULT_STATEMENT_DESCRIPTOR);
 }
