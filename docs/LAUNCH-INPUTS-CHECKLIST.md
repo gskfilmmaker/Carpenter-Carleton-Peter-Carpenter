@@ -13,10 +13,22 @@ See build brief section 12 and master-plan section 10 for the source requirement
 - [ ] **Peter's approved RCIC display wording, license number and CICC register link
       presentation.** Currently shown: "Peter Carpenter, RCIC — College ID R408495" with a link to
       the CICC Public Register. Confirm exact wording.
-- [x] **Public email, phone and WhatsApp number** — supplied directly and wired sitewide via
-      `src/content/site.ts` (`info@carpentercarleton.ca`, `+1 647 861 3970`). Still open: **exact
-      office address** and **hours** (`site.addressLine` remains a placeholder), and confirmation
-      that publishing the phone/WhatsApp number as given is approved for public use.
+- [x] **Public email and office address** — `info@carpentercarleton.ca` and `3062 Lake Shore Blvd
+      W, Etobicoke, ON M8V 4C9` (`src/content/site.ts`), the address corroborated by the firm's
+      Google Business Profile and an independent directory listing. Also now included in the
+      `ProfessionalService` structured data (`src/components/seo/StructuredData.tsx`).
+- [x] **Phone number conflict — resolved by Peter (2026-08-08).** The Google Business Profile
+      number, `(905) 271-7733`, is not in service. Confirmed working numbers: office/call line
+      `(416) 252-7733` (`site.businessPhone`) and WhatsApp/mobile `+1 647 861 3970`
+      (`site.businessWhatsApp`, unchanged) — both wired in `src/content/site.ts` and used sitewide
+      (footer, sticky CTA, contact channels, booking confirmation, structured data). The stale
+      Google Business Profile listing itself should still be corrected/claimed at some point so it
+      stops showing the dead number to people who find the firm via Google Maps/Search, but that's
+      outside this codebase.
+- [ ] **Office hours.** Not published anywhere on the site yet. Only one data point surfaced in
+      research ("opens 9am Monday") — not enough to publish a full weekly schedule. Get the
+      complete hours from Peter, then add them to the footer/About page and as
+      `openingHoursSpecification` in the structured data.
 - [ ] **Peter's direct line — confirm it should stay unpublished.** Stored server-only in
       `src/lib/server/internal-contact.ts`, gated by `SHOW_SECONDARY_PHONE` (default off). Nothing
       in the current UI renders it. Confirm this is the intended posture before any internal/staff
@@ -63,8 +75,13 @@ See build brief section 12 and master-plan section 10 for the source requirement
 - [ ] **Final approved biography, headshot and brand assets** for the About page.
 - [ ] **Approved languages and qualified translation/review process** before any non-English
       content ships.
-- [ ] **Privacy policy, cookie policy, retention policy and consent wording** — `/privacy` is a
-      placeholder pending this input.
+- [x] **Privacy policy, cookie policy, retention policy and consent wording** — `/privacy` has
+      real, code-accurate content (real form fields collected, real sub-processor list, an honest
+      cookies section reflecting that no tracking is actually live yet, PIPEDA-consistent rights
+      language). The on-page "Draft" badge was removed per explicit instruction (2026-08-08) — note
+      this reflects the site's actual data handling as built, not an independent lawyer review; if
+      Peter later has counsel review it, treat any resulting redline as authoritative over this
+      text.
 - [ ] **CRM and secure client-document portal.** Not yet built (no CRM lead-sync adapter or
       authenticated document upload exists — booking/contact submissions currently only trigger
       email notifications, with no persistence layer / database in this environment).
