@@ -14,7 +14,7 @@ export default function AboutPage() {
     <>
       <Section className="pt-10 pb-0">
         <Eyebrow>
-          <MapleLeafIcon className="h-3.5 w-3.5 text-copper" />
+          <MapleLeafIcon className="h-5 w-5 text-copper-dark" />
           Regulated Canadian Immigration Consultant · {site.designation} #{site.collegeId}
         </Eyebrow>
         <h1 className="max-w-2xl font-serif text-3xl font-normal text-ink sm:text-4xl">

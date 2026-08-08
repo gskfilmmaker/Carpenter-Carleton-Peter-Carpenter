@@ -8,11 +8,11 @@ import { MapleLeafIcon } from "@/components/ui/MapleLeafIcon";
 export function HeroSection() {
   return (
     <div className="relative overflow-hidden">
-      <CanadaMapWatermark className="pointer-events-none absolute -right-24 -top-20 hidden h-[560px] w-[560px] text-sage opacity-[0.06] blur-[1px] sm:block" />
+      <CanadaMapWatermark className="pointer-events-none absolute -right-16 -top-16 hidden h-[620px] w-[620px] text-copper opacity-[0.16] sm:block" />
       <Container className="relative grid items-center gap-10 py-12 sm:py-16 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:gap-12 lg:py-20">
       <div>
         <Eyebrow>
-          <MapleLeafIcon className="h-3.5 w-3.5 text-copper" />
+          <MapleLeafIcon className="h-5 w-5 text-copper-dark" />
           GTA-based Canadian immigration guidance
         </Eyebrow>
         <h1 className="max-w-[15ch] font-serif text-[clamp(2.3rem,5.2vw,3.6rem)] font-normal leading-[1.08] tracking-[-0.01em] text-ink">
