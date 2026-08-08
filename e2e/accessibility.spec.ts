@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const pages = ["/book", "/book/confirmation", "/contact", "/privacy"];
+const pages = ["/book", "/book/confirmation", "/contact", "/privacy", "/fees"];
 
 for (const path of pages) {
   test(`${path} has no critical or serious Axe violations`, async ({ page }) => {
@@ -46,4 +46,18 @@ test("/book: WhatsApp video platform shows the call-back note instead of a join 
   await page.getByRole("radio", { name: /WhatsApp video/i }).check({ force: true });
   await page.getByRole("button", { name: "Choose a time" }).click();
   await expect(page.getByText(/08:00–20:00 Toronto/i).or(page.getByText(/Toronto time/i)).first()).toBeVisible({ timeout: 10_000 });
+});
+
+test("/fees shows the real $250 consultation price, not a 'pending approval' placeholder", async ({ page }) => {
+  await page.goto("/fees");
+  await expect(page.getByText("CAD $250.00")).toBeVisible();
+});
+
+test("/book and /contact FAQs quote the real consultation price, not stale placeholder text", async ({ page }) => {
+  for (const path of ["/book", "/contact"]) {
+    await page.goto(path);
+    await page.getByText("What does a consultation cost, and are outcomes guaranteed?").click();
+    await expect(page.getByText(/is CAD \$250\.00/)).toBeVisible();
+    await expect(page.getByText(/being finalized/)).not.toBeVisible();
+  }
 });
