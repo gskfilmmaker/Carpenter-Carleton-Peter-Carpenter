@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "How Carpenter & Carleton collects, uses and protects your information.",
 };
 
-const LAST_UPDATED = "2026-08-09";
+const LAST_UPDATED = "2026-08-08";
 
 export default function PrivacyPage() {
   return (
@@ -16,10 +16,6 @@ export default function PrivacyPage() {
       <h1 className="max-w-2xl font-serif text-3xl font-normal text-ink sm:text-4xl">
         Privacy policy
       </h1>
-      <p className="mt-3 inline-block rounded-full border border-line bg-sage-pale px-3 py-1 text-xs font-medium text-ink-soft">
-        Draft — describes this site&rsquo;s actual data handling as built; pending Peter&rsquo;s and
-        legal counsel&rsquo;s final review before this is treated as the firm&rsquo;s official policy.
-      </p>
 
       <div className="mt-6 max-w-2xl space-y-8 text-ink-soft">
         <div>
@@ -119,8 +115,7 @@ export default function PrivacyPage() {
             submissions trigger email notifications and are not otherwise stored by the site
             beyond what is technically necessary to prevent duplicate charges and abuse (cleared
             automatically, not a permanent record). Information contained in resulting emails is
-            retained according to our normal business email-retention practice. This section will
-            be expanded with specific retention periods once finalized.
+            retained according to our normal business email-retention practice.
           </p>
         </div>
 
