@@ -15,6 +15,11 @@ export const site = {
   representativeName: "Peter Carpenter",
   designation: "RCIC",
   collegeId: "R408495", // placeholder pending display-approval, per CICC public register lookup
+  // APPROVAL-PENDING: "More than 25 years" / "25+ years" is the approved framing per the build
+  // brief (source-verified firm material; do NOT change to "nearly three decades" or any figure
+  // not backed by verified records). Peter must give final written sign-off before public launch —
+  // see docs/LAUNCH-INPUTS-CHECKLIST.md.
+  yearsOfExperience: "25+ years",
   ciccRegisterUrl:
     "https://college-ic.ca/protecting-the-public/find-an-immigration-consultant",
   representativeInfoUrl:

@@ -12,15 +12,67 @@ export default function AboutPage() {
   return (
     <>
       <Section className="pt-10 pb-0">
-        <Eyebrow>About the practice</Eyebrow>
+        <Eyebrow>
+          Regulated Canadian Immigration Consultant · {site.designation} #{site.collegeId}
+        </Eyebrow>
         <h1 className="max-w-2xl font-serif text-3xl font-normal text-ink sm:text-4xl">
-          {site.representativeName}, {site.designation}
+          Experience you can rely on
         </h1>
-        <p className="mt-4 max-w-2xl text-ink-soft">
-          A full, approved biography is pending Peter&rsquo;s sign-off (see the launch-inputs
-          checklist) and will replace this placeholder before public launch. Until then, here is
-          what is independently verifiable today.
+
+        <ul className="mt-5 flex flex-wrap gap-2.5" aria-label="Credentials">
+          <li className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-medium text-ink-soft">
+            {site.yearsOfExperience} of experience
+          </li>
+          <li className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-medium text-ink-soft">
+            {site.designation} #{site.collegeId}
+          </li>
+        </ul>
+
+        <p className="mt-6 max-w-2xl text-ink-soft">
+          For more than {site.yearsOfExperience.replace("+", " ")}, {site.representativeName} and{" "}
+          {site.legalName} have helped individuals, families and businesses navigate the Canadian
+          immigration system. As a Regulated Canadian Immigration Consultant, Peter offers
+          practical, personalized guidance grounded in decades of hands-on experience.
         </p>
+
+        {/*
+          APPROVAL-PENDING: biographical detail below (England → Toronto → University of Western
+          Ontario) is drawn from Peter's own historical firm material and public records, but Peter
+          must give final written confirmation before public launch — see
+          docs/LAUNCH-INPUTS-CHECKLIST.md. Rendered now per the approved copy brief; do not embellish.
+        */}
+        <p className="mt-4 max-w-2xl text-ink-soft">
+          Peter came to Canada from England as a child, grew up in Toronto, and was educated there
+          and at the University of Western Ontario. Over the years, {site.legalName} has worked
+          with clients from across Canada and around the world — professionals, families, students
+          and employers — helping them understand their options, prepare their applications and
+          meet the procedural requirements that Canadian immigration involves.
+        </p>
+
+        <p className="mt-4 max-w-2xl text-ink-soft">
+          His practice spans a broad range of matters, from permanent residence and Express Entry
+          to family sponsorship, work and study permits, provincial nominee pathways, business
+          immigration and more complex cases. Canadian immigration is rarely just about forms — it
+          often involves a career, a business, or the chance for a family to build a future
+          together. Peter&rsquo;s approach starts with the person: understand the circumstances,
+          explain the options clearly, and set out a practical path forward.
+        </p>
+
+        <p className="mt-8 max-w-xl border-l-2 border-copper pl-5 font-serif text-xl italic text-ink">
+          Your immigration journey is personal. Your advice should be too.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3.5">
+          <ButtonLink href="/book">Book a consultation</ButtonLink>
+          <ButtonLink
+            href={site.ciccRegisterUrl}
+            variant="secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Verify on the CICC Public Register
+          </ButtonLink>
+        </div>
       </Section>
 
       <Section className="border-t border-line bg-surface">

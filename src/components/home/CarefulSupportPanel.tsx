@@ -1,4 +1,5 @@
 import { Section, Eyebrow } from "@/components/layout/Section";
+import { site } from "@/content/site";
 
 const proofPoints = [
   "A named, verifiable representative",
@@ -17,10 +18,18 @@ export function CarefulSupportPanel() {
           className="hidden aspect-[4/3] rounded-3xl bg-[radial-gradient(120%_120%_at_20%_20%,var(--color-sage-pale),var(--color-canvas)_70%)] lg:block"
         />
         <div>
-          <Eyebrow>What careful support looks like</Eyebrow>
+          <Eyebrow>Why {site.legalName}</Eyebrow>
           <h2 className="max-w-lg font-serif text-3xl font-normal text-ink">
-            The difference between a lead broker and an accountable practice
+            Over {site.yearsOfExperience} of Canadian immigration experience
           </h2>
+          <p className="mt-4 max-w-lg text-ink-soft">
+            {site.representativeName}, {site.designation} #{site.collegeId}, is a Regulated
+            Canadian Immigration Consultant who has spent more than{" "}
+            {site.yearsOfExperience.replace("+", " ")} helping individuals, families and
+            businesses navigate Canadian immigration through {site.legalName}. His approach is
+            straightforward: listen carefully, assess each case on its own facts, explain the
+            options clearly, and set out a practical next step.
+          </p>
           <ul className="mt-8 space-y-4">
             {proofPoints.map((point) => (
               <li key={point} className="flex items-start gap-3">
