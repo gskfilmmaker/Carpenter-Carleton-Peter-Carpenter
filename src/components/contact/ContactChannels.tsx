@@ -90,9 +90,9 @@ export function ContactChannels({ variant = "grid" }: { variant?: "grid" | "row"
           <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-sage-pale text-sage">
             {channel.icon}
           </span>
-          <span>
+          <span className="min-w-0">
             <span className="block text-xs text-muted">{channel.sub}</span>
-            <span className="font-medium">{channel.label}</span>
+            <span className="block break-words font-medium">{channel.label}</span>
           </span>
         </a>
       ))}
