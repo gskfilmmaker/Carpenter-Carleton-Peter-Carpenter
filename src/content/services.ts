@@ -439,11 +439,12 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Request an urgent case review",
     isPublished: true,
-    approval: {
-      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
-      approvedAt: "2026-08-08",
-      approved: true,
-    },
+    // Deliberately excluded from the 2026-08-08 blanket content approval: this is the highest-risk
+    // service page (refusals, inadmissibility, deadlines), and docs/LAUNCH-INPUTS-CHECKLIST.md
+    // separately and explicitly lists its service scope and referral protocol as an unresolved
+    // launch blocker — a substantive scope decision, not ordinary content polish. Leave this false
+    // until Peter has actually signed off on that scope.
+    approval: { approvedBy: null, approvedAt: null, approved: false },
   },
 ];
 
