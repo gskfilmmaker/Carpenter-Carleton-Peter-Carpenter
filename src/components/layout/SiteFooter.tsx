@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import {
   formatPhoneForDisplay,
+  googleMapsHref,
   mailtoHref,
   primaryNav,
   site,
@@ -32,7 +33,14 @@ export function SiteFooter() {
             >
               Verify on the CICC Public Register
             </a>
-            <p>{site.addressLine}</p>
+            <a
+              href={googleMapsHref(site.addressLine)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block underline decoration-copper underline-offset-2 hover:decoration-white hover:text-white"
+            >
+              {site.addressLine}
+            </a>
           </div>
           <ul className="mt-5 space-y-1.5 text-sm text-slate-300">
             <li>

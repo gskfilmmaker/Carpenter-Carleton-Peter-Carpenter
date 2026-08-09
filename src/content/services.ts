@@ -81,7 +81,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Book an Express Entry consultation",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
     faqs: [
       {
         question: "Does a higher CRS score guarantee an invitation?",
@@ -134,7 +138,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Book a provincial pathway consultation",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "work-permits-employers",
@@ -186,7 +194,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Start an employer or worker enquiry",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "study-permits",
@@ -227,7 +239,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Book a study-pathway consultation",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "family-sponsorship",
@@ -268,7 +284,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Book a family sponsorship consultation",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "business-pathways",
@@ -312,7 +332,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Request a business pathway assessment",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "citizenship-pr-cards",
@@ -359,7 +383,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Book a citizenship or PR card consultation",
     isPublished: true,
-    approval: { approvedBy: null, approvedAt: null, approved: false },
+    approval: {
+      approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter sign-off)",
+      approvedAt: "2026-08-08",
+      approved: true,
+    },
   },
   {
     slug: "complex-matters",
@@ -411,6 +439,11 @@ export const services: Service[] = [
     lastReviewed: REVIEWED,
     ctaLabel: "Request an urgent case review",
     isPublished: true,
+    // Deliberately excluded from the 2026-08-08 blanket content approval: this is the highest-risk
+    // service page (refusals, inadmissibility, deadlines), and docs/LAUNCH-INPUTS-CHECKLIST.md
+    // separately and explicitly lists its service scope and referral protocol as an unresolved
+    // launch blocker — a substantive scope decision, not ordinary content polish. Leave this false
+    // until Peter has actually signed off on that scope.
     approval: { approvedBy: null, approvedAt: null, approved: false },
   },
 ];

@@ -76,6 +76,12 @@ export function telHref(e164: string): string {
   return `tel:${e164}`;
 }
 
+/** Universal Google Maps search link — no API key needed, works cross-platform (opens the
+ * device's default maps app on mobile via Google's redirect). */
+export function googleMapsHref(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 export function mailtoHref(email: string): string {
   return `mailto:${email}`;
 }

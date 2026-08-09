@@ -1,12 +1,10 @@
-import { site } from "@/content/site";
+import { googleMapsHref, site } from "@/content/site";
 
 /**
  * ProfessionalService structured data using only confirmed NAP fields (build brief section 9:
- * "only after business NAP... is confirmed"). `address` is now included since `site.addressLine`
- * is corroborated by the firm's Google Business Profile and an independent directory listing (see
- * src/content/site.ts). `telephone` still carries the open phone-number discrepancy noted there —
- * revisit once Peter confirms which number is current. No aggregate-rating markup, per the brief's
- * explicit prohibition.
+ * "only after business NAP... is confirmed"). `address`, `telephone` and `hasMap` all reflect the
+ * NAP facts confirmed in src/content/site.ts. No aggregate-rating markup, per the brief's explicit
+ * prohibition.
  */
 export function StructuredData() {
   const json = {
@@ -23,6 +21,7 @@ export function StructuredData() {
       postalCode: "M8V 4C9",
       addressCountry: "CA",
     },
+    hasMap: googleMapsHref(site.addressLine),
     areaServed: site.serviceArea,
     url: "https://carpentercarleton.ca",
     sameAs: [site.ciccRegisterUrl],

@@ -34,7 +34,10 @@ See build brief section 12 and master-plan section 10 for the source requirement
       in the current UI renders it. Confirm this is the intended posture before any internal/staff
       view is built to surface it.
 - [ ] **Final approved service scope and referral protocol**, especially for the Complex /
-      Time-Sensitive Matters page (`/services/complex-matters`).
+      Time-Sensitive Matters page (`/services/complex-matters`). Deliberately excluded from the
+      2026-08-08 blanket content approval below — flagged by review as the highest-risk page
+      (refusals, inadmissibility, deadlines) and still shows its "Draft content" badge until this
+      is actually resolved.
 - [ ] **HST/tax treatment on the $250 CAD consultation fee.** `src/content/fees.ts`'s
       `consultation` tier is now `amount: 250, approved: true` (per explicit instruction to this
       repo — not independently verified with Peter). Tax is **not** hard-coded: it's read from
@@ -97,9 +100,16 @@ See build brief section 12 and master-plan section 10 for the source requirement
       (`src/components/forms/Turnstile.tsx`, `src/lib/turnstile.ts`) and activate automatically once
       `NEXT_PUBLIC_TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET_KEY` are set; until then, forms rely on the
       honeypot field, a render-to-submit timing check, and a basic in-memory rate limiter.
-- [ ] **Sign-off on every service page's content** (`src/content/services.ts`) and every Policy
-      Desk article (`src/content/resources.ts`) — each currently has `approval.approved: false`
-      and a visible "draft" badge until reviewed.
+- [x] **Sign-off on every service page's content** (`src/content/services.ts`) and every Policy
+      Desk article (`src/content/resources.ts`), **except Complex / Time-Sensitive Matters** — 7 of
+      8 service pages and all 3 Policy Desk articles are now `approval.approved: true` (marked
+      2026-08-08, `approvedBy: "GSK Productions Inc. (explicit instruction, not a documented Peter
+      sign-off)"`). `/services/complex-matters` was deliberately left `approved: false` — PR review
+      correctly flagged that blanket-approving it would suppress its draft badge while its service
+      scope and referral protocol (a substantive decision, not content polish) is still an open
+      blocker above. This is a content-quality review carried out by explicit instruction, not a
+      substantive legal/compliance review by Peter — if he wants changes to any approved page's
+      copy later, that's a normal content edit, not un-doing an approval mistake.
 
 ## Email deliverability — Resend domain verification for carpentercarleton.ca
 
