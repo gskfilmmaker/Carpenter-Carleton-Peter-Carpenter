@@ -97,9 +97,13 @@ See build brief section 12 and master-plan section 10 for the source requirement
       (`src/components/forms/Turnstile.tsx`, `src/lib/turnstile.ts`) and activate automatically once
       `NEXT_PUBLIC_TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET_KEY` are set; until then, forms rely on the
       honeypot field, a render-to-submit timing check, and a basic in-memory rate limiter.
-- [ ] **Sign-off on every service page's content** (`src/content/services.ts`) and every Policy
-      Desk article (`src/content/resources.ts`) — each currently has `approval.approved: false`
-      and a visible "draft" badge until reviewed.
+- [x] **Sign-off on every service page's content** (`src/content/services.ts`) and every Policy
+      Desk article (`src/content/resources.ts`) — all 8 service pages and all 3 Policy Desk
+      articles are now `approval.approved: true` (marked 2026-08-08, `approvedBy: "GSK Productions
+      Inc. (explicit instruction, not a documented Peter sign-off)"`). The visible "Draft content"
+      badge on service pages is gone. This is a content-quality review carried out by explicit
+      instruction, not a substantive legal/compliance review by Peter — if he wants changes to any
+      page's copy later, that's a normal content edit, not un-doing an approval mistake.
 
 ## Email deliverability — Resend domain verification for carpentercarleton.ca
 
