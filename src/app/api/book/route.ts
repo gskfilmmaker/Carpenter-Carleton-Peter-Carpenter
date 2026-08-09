@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { bookingSchema } from "@/lib/validation/booking";
 import { calendarAdapter } from "@/lib/adapters/calendar";
-import { sendPreConsultationSequence } from "@/lib/adapters/email";
+import { emailAdapter, sendPreConsultationSequence } from "@/lib/adapters/email";
 import { getClientKey, isRateLimited } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { submittedTooFast } from "@/lib/form-timing";
 import { getStatementDescriptor, getStripeClient, isPaymentsLive } from "@/lib/payments";
 import { getConsultTaxConfig, computeTaxAmount } from "@/lib/tax-config";
 import { generateBookingReference } from "@/lib/booking-store";
+import { getInternalNotificationRecipients } from "@/lib/server/internal-contact";
 import { feeTiers } from "@/content/fees";
 
 const consultationFee = feeTiers.find((tier) => tier.service === "consultation");
@@ -143,6 +144,31 @@ export async function POST(request: Request) {
     consultationType,
     consultationAtUtc: slotStartUtc,
   });
+
+  // Payments aren't live yet, so this booking completed without a Stripe webhook — that route is
+  // otherwise the only place staff get told a booking happened. Send the same internal notification
+  // here so a request-only booking isn't silent to everyone but the client.
+  const internalResult = await emailAdapter.send({
+    to: getInternalNotificationRecipients(),
+    template: "booking-internal-notification",
+    data: {
+      reference: booking.reference,
+      name,
+      email,
+      phone,
+      consultationType,
+      meetingFormat,
+      videoPlatform,
+      slotStartUtc,
+      visitorTimeZone,
+      message,
+      joinUrl: booking.joinUrl,
+      paymentStatus: "request-only",
+    },
+  });
+  if (!internalResult.ok) {
+    console.error("[book] internal notification email failed to send", internalResult.error);
+  }
 
   return NextResponse.json({
     ok: true,
