@@ -59,12 +59,23 @@ const subjects: Record<EmailTemplate, string> = {
   "contact-receipt": "We received your message",
   "callback-request": "New call-back request from the website",
   "booking-confirmation": "Your consultation is confirmed",
-  "booking-internal-notification": "New paid consultation booking",
+  "booking-internal-notification": "New consultation booking",
   "booking-prep-guide": "What to prepare for your consultation",
   "booking-representation-explainer": "How representation works",
   "pathway-check-summary": "Your Canada Pathway Readiness summary",
   "resource-download": "Your requested guide",
 };
+
+/** `booking-internal-notification`'s subject reflects the actual payment status instead of always
+ * saying "paid" — staff should never see a request-only (unpaid) booking mislabeled as paid. */
+function subjectFor(message: EmailMessage): string {
+  if (message.template === "booking-internal-notification") {
+    return message.data.paymentStatus === "paid"
+      ? "New paid consultation booking"
+      : "New consultation request (unpaid)";
+  }
+  return subjects[message.template];
+}
 
 const platformLabels: Record<string, string> = {
   teams: "Microsoft Teams",
@@ -183,7 +194,7 @@ function createResendAdapter(apiKey: string): EmailAdapter {
         from: `${site.legalName} <${fromAddress}>`,
         to: message.to,
         reply_to: site.emailReplyTo,
-        subject: subjects[message.template],
+        subject: subjectFor(message),
         text: bodyFor(message.template, message.data),
         ...(message.scheduledAt ? { scheduled_at: message.scheduledAt } : {}),
       }),
