@@ -180,6 +180,41 @@ function bodyFor(template: EmailTemplate, data: Record<string, unknown>): string
   }
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/**
+ * Shared, table-based email signature. Inline styling keeps it reliable in Outlook, Gmail, Apple
+ * Mail and other common email clients, which strip or ignore <style> blocks and most CSS.
+ */
+function signatureHtml(): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#243B53;">
+<tr>
+<td style="padding:0 18px 0 0;vertical-align:top;border-right:2px solid #B46F4B;">
+<div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold;color:#102A43;line-height:1.2;white-space:nowrap;">Carpenter &amp; Carleton</div>
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#627D98;letter-spacing:0.3px;padding-top:2px;">Canadian Immigration Guidance</div>
+</td>
+<td style="padding:0 0 0 18px;vertical-align:top;">
+<div style="font-size:15px;font-weight:bold;color:#102A43;line-height:1.3;">Peter Carpenter, RCIC</div>
+<div style="font-size:12px;color:#627D98;padding:1px 0 8px 0;">Regulated Canadian Immigration Consultant &middot; College ID R408495</div>
+<div style="font-size:12px;color:#243B53;line-height:1.7;">
+<span style="color:#B46F4B;font-weight:bold;">T</span>&nbsp;<a href="tel:+14162527733" style="color:#243B53;text-decoration:none;">+1 (416) 252-7733</a>&nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#B46F4B;font-weight:bold;">W</span>&nbsp;<a href="https://wa.me/16478613970" style="color:#243B53;text-decoration:none;">WhatsApp +1 (647) 861-3970</a><br />
+<span style="color:#B46F4B;font-weight:bold;">E</span>&nbsp;<a href="mailto:info@carpentercarleton.ca" style="color:#243B53;text-decoration:none;">info@carpentercarleton.ca</a>&nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#B46F4B;font-weight:bold;">Web</span>&nbsp;<a href="https://carpentercarleton.ca" style="color:#243B53;text-decoration:none;">carpentercarleton.ca</a><br />
+<span style="color:#B46F4B;font-weight:bold;">A</span>&nbsp;<a href="https://www.google.com/maps/search/?api=1&amp;query=3062%20Lake%20Shore%20Blvd%20W%2C%20Etobicoke%2C%20ON%20M8V%204C9" style="color:#243B53;text-decoration:none;">3062 Lake Shore Blvd W, Etobicoke, ON M8V 4C9</a>
+</div>
+<div style="font-size:11px;padding-top:8px;"><a href="https://college-ic.ca/protecting-the-public/find-an-immigration-consultant" style="color:#B46F4B;text-decoration:none;font-weight:bold;">Verify this consultant on the CICC Public Register &rsaquo;</a></div>
+</td>
+</tr>
+<tr><td colspan="2" style="padding:12px 0 0 0;"><div style="border-top:1px solid #D7D4CC;padding-top:8px;font-size:10px;color:#829AB1;line-height:1.5;font-family:Arial,Helvetica,sans-serif;max-width:560px;">Hiring a representative is optional. A representative cannot guarantee a decision, approval or processing time &mdash; government authorities make all decisions.<br />This email and any attachments are confidential and intended only for the named recipient. Please do not send passports, bank statements, immigration portal passwords or other highly sensitive documents by email. If you received this in error, please delete it and notify the sender.</div></td></tr>
+</table>`;
+}
+
+function htmlFor(template: EmailTemplate, data: Record<string, unknown>): string {
+  const body = escapeHtml(bodyFor(template, data)).replace(/\n/g, "<br />");
+  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#243B53;">${body}</div><div style="height:24px;line-height:24px;">&nbsp;</div>${signatureHtml()}`;
+}
+
 const SANDBOX_FROM = "onboarding@resend.dev";
 
 function createResendAdapter(apiKey: string): EmailAdapter {
@@ -196,6 +231,7 @@ function createResendAdapter(apiKey: string): EmailAdapter {
         reply_to: site.emailReplyTo,
         subject: subjectFor(message),
         text: bodyFor(message.template, message.data),
+        html: htmlFor(message.template, message.data),
         ...(message.scheduledAt ? { scheduled_at: message.scheduledAt } : {}),
       }),
     });
