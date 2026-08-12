@@ -18,21 +18,21 @@ See build brief section 12 and master-plan section 10 for the source requirement
       Google Business Profile and an independent directory listing. Also now included in the
       `ProfessionalService` structured data (`src/components/seo/StructuredData.tsx`).
 - [x] **Phone number conflict — resolved by Peter (2026-08-08).** The Google Business Profile
-      number, `(905) 271-7733`, is not in service. Confirmed working numbers: office/call line
-      `(416) 252-7733` (`site.businessPhone`) and WhatsApp/mobile `+1 647 861 3970`
-      (`site.businessWhatsApp`, unchanged) — both wired in `src/content/site.ts` and used sitewide
-      (footer, sticky CTA, contact channels, booking confirmation, structured data). The stale
-      Google Business Profile listing itself should still be corrected/claimed at some point so it
-      stops showing the dead number to people who find the firm via Google Maps/Search, but that's
-      outside this codebase.
+      number, `(905) 271-7733`, is not in service. Confirmed working office/call line:
+      `(416) 252-7733` (`site.businessPhone`) — wired in `src/content/site.ts` and used sitewide
+      (footer, sticky CTA, contact channels, structured data). The stale Google Business Profile
+      listing itself should still be corrected/claimed at some point so it stops showing the dead
+      number to people who find the firm via Google Maps/Search, but that's outside this codebase.
+- [x] **WhatsApp number updated (2026-08-09).** `site.businessWhatsApp` is now `+1 416 996 2168`
+      (Peter's direct line), replacing the previous `+1 647 861 3970`. This is the same number
+      previously kept private as `SECONDARY_PHONE` in `src/lib/server/internal-contact.ts` — that
+      constant, its `getSecondaryPhone()` accessor, its test, and `SHOW_SECONDARY_PHONE` were all
+      removed since the number is now public via `site.businessWhatsApp` and the module's reason
+      for existing (keeping this specific number out of the client bundle) no longer applies.
 - [ ] **Office hours.** Not published anywhere on the site yet. Only one data point surfaced in
       research ("opens 9am Monday") — not enough to publish a full weekly schedule. Get the
       complete hours from Peter, then add them to the footer/About page and as
       `openingHoursSpecification` in the structured data.
-- [ ] **Peter's direct line — confirm it should stay unpublished.** Stored server-only in
-      `src/lib/server/internal-contact.ts`, gated by `SHOW_SECONDARY_PHONE` (default off). Nothing
-      in the current UI renders it. Confirm this is the intended posture before any internal/staff
-      view is built to surface it.
 - [ ] **Final approved service scope and referral protocol**, especially for the Complex /
       Time-Sensitive Matters page (`/services/complex-matters`). Deliberately excluded from the
       2026-08-08 blanket content approval below — flagged by review as the highest-risk page
