@@ -6,10 +6,10 @@
  * contact details and are safe to publish. `legalName` and `addressLine` are now corroborated by
  * the firm's live Google Business Profile (name, address) plus an independent directory listing
  * for the address — see the inline notes below for what's still open. `collegeId` remains
- * pending Peter's explicit display-approval, per docs/LAUNCH-INPUTS-CHECKLIST.md. Peter's direct
- * line and the internal-notification recipient list are intentionally NOT exported here — this
- * module is imported by client components, so anything on it ships in the client bundle. Those
- * two live server-only in src/lib/server/internal-contact.ts instead.
+ * pending Peter's explicit display-approval, per docs/LAUNCH-INPUTS-CHECKLIST.md. The
+ * internal-notification recipient list is intentionally NOT exported here — this module is
+ * imported by client components, so anything on it ships in the client bundle. That list lives
+ * server-only in src/lib/server/internal-contact.ts instead.
  */
 
 export const site = {
@@ -36,10 +36,12 @@ export const site = {
     "Do not send passports, bank statements, immigration portal passwords or other sensitive documents through this form.",
   publicEmail: "info@carpentercarleton.ca",
   // Phone-number conflict resolved by Peter (2026-08-08): the Google Business Profile number,
-  // (905) 271-7733, is not in service — do not use it. The working office line is (416) 252-7733;
-  // the WhatsApp/mobile line stays separate at +1 647 861 3970 (unchanged, still the live number).
+  // (905) 271-7733, is not in service — do not use it. The working office line is (416) 252-7733.
   businessPhone: "+14162527733",
-  businessWhatsApp: "+16478613970",
+  // WhatsApp updated (2026-08-09): now Peter's direct line, +1 416 996 2168. This is the same
+  // number previously kept private as SECONDARY_PHONE in src/lib/server/internal-contact.ts —
+  // that mechanism was retired since the number is public here now.
+  businessWhatsApp: "+14169962168",
   // Confirmed via the firm's Google Business Profile and corroborated by an independent directory
   // listing (same address on both). Office hours are NOT yet published anywhere on the site —
   // only a single data point ("opens 9am Monday") surfaced in research, which isn't enough to

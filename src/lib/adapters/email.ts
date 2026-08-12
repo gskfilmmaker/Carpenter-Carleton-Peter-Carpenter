@@ -199,7 +199,7 @@ function signatureHtml(): string {
 <div style="font-size:15px;font-weight:bold;color:#102A43;line-height:1.3;">Peter Carpenter, RCIC</div>
 <div style="font-size:12px;color:#627D98;padding:1px 0 8px 0;">Regulated Canadian Immigration Consultant &middot; College ID R408495</div>
 <div style="font-size:12px;color:#243B53;line-height:1.7;">
-<span style="color:#B46F4B;font-weight:bold;">T</span>&nbsp;<a href="tel:+14162527733" style="color:#243B53;text-decoration:none;">+1 (416) 252-7733</a>&nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#B46F4B;font-weight:bold;">W</span>&nbsp;<a href="https://wa.me/16478613970" style="color:#243B53;text-decoration:none;">WhatsApp +1 (647) 861-3970</a><br />
+<span style="color:#B46F4B;font-weight:bold;">T</span>&nbsp;<a href="tel:+14162527733" style="color:#243B53;text-decoration:none;">+1 (416) 252-7733</a>&nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#B46F4B;font-weight:bold;">W</span>&nbsp;<a href="https://wa.me/14169962168" style="color:#243B53;text-decoration:none;">WhatsApp +1 (416) 996-2168</a><br />
 <span style="color:#B46F4B;font-weight:bold;">E</span>&nbsp;<a href="mailto:info@carpentercarleton.ca" style="color:#243B53;text-decoration:none;">info@carpentercarleton.ca</a>&nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#B46F4B;font-weight:bold;">Web</span>&nbsp;<a href="https://carpentercarleton.ca" style="color:#243B53;text-decoration:none;">carpentercarleton.ca</a><br />
 <span style="color:#B46F4B;font-weight:bold;">A</span>&nbsp;<a href="https://www.google.com/maps/search/?api=1&amp;query=3062%20Lake%20Shore%20Blvd%20W%2C%20Etobicoke%2C%20ON%20M8V%204C9" style="color:#243B53;text-decoration:none;">3062 Lake Shore Blvd W, Etobicoke, ON M8V 4C9</a>
 </div>
