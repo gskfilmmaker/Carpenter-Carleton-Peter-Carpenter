@@ -60,6 +60,21 @@ export const site = {
    * Productions Inc. via Stripe on Carpenter & Carleton's behalf (single GSK Stripe account,
    * merchant of record; not a Stripe Connect setup). */
   managedBy: "GSK Productions Inc.",
+
+  /**
+   * Existing, already-live Stripe Payment Link for customers paying an amount already stated in a
+   * written fee agreement (NOT the $250 consultation fee — that has its own Checkout Session flow,
+   * see src/lib/payments.ts and src/app/api/book/route.ts). This is a public, hosted Stripe URL —
+   * safe to ship in the client bundle, no secret involved. The Payment Link's ID (needed server-side
+   * to recognize its webhook events) lives in src/lib/payments.ts next to the other Stripe config.
+   *
+   * Do not change this URL or the min/max without updating the actual Stripe Payment Link first —
+   * this is a pointer to Stripe-hosted checkout, not a value Stripe reads from this site.
+   */
+  agreedFeePaymentUrl: "https://buy.stripe.com/7sYdR81UsgHZbgK5743Je00",
+  agreedFeePaymentMin: 1000,
+  agreedFeePaymentMax: 10000,
+  agreedFeePaymentCurrency: "CAD",
 } as const;
 
 /** Config-flagged features that ship off by default until Peter opts in. */

@@ -88,7 +88,43 @@ export default function FeesPage() {
         </div>
       </Section>
 
-      <Section className="border-t border-line">
+      <Section className="border-t border-line" id="agreed-fee-payment">
+        <h2 className="font-serif text-2xl font-normal text-ink">Already have a written fee agreement?</h2>
+        <p className="mt-3 max-w-2xl text-ink-soft">
+          If Peter has given you a written scope and fee agreement, use this secure link to pay the
+          exact amount stated in that agreement — not any other amount. This is for an agreed
+          payment only: making a payment here does not itself create a fee agreement, book a
+          consultation, or guarantee any immigration decision, approval or processing time.
+        </p>
+        <p className="mt-3 max-w-2xl text-sm text-ink-soft">
+          This link accepts payments between {site.agreedFeePaymentCurrency} $
+          {site.agreedFeePaymentMin.toLocaleString()} and {site.agreedFeePaymentCurrency} $
+          {site.agreedFeePaymentMax.toLocaleString()}. If your agreed fee falls outside that range,{" "}
+          <a
+            href="/contact"
+            className="font-medium text-ink underline underline-offset-4 hover:text-copper-dark"
+          >
+            contact us
+          </a>{" "}
+          directly instead of using this link.
+        </p>
+        <div className="mt-6">
+          <ButtonLink
+            href={site.agreedFeePaymentUrl}
+            variant="secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Pay an agreed fee (opens Stripe secure checkout in a new tab)
+          </ButtonLink>
+        </div>
+        <p className="mt-3 text-xs text-muted">
+          Processed securely by Stripe. Tax treatment for this payment is to be confirmed with
+          Peter&rsquo;s accountant; it is not calculated or added by this link.
+        </p>
+      </Section>
+
+      <Section className="border-t border-line bg-surface">
         <h2 className="font-serif text-2xl font-normal text-ink">Policy notes</h2>
         <ul className="mt-4 max-w-2xl space-y-2.5 text-sm text-ink-soft">
           <li>Complexity can change the fee for further work; you receive a written agreement before representation begins.</li>

@@ -42,3 +42,21 @@ export function markSessionFinalized(sessionId: string, booking: FinalizedBookin
 export function generateBookingReference(): string {
   return `CC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
+
+/**
+ * Separate, much simpler idempotency tracker for "pay an agreed fee" Payment Link sessions (see
+ * src/app/api/webhooks/stripe/route.ts). Deliberately NOT folded into `finalized`/`FinalizedBooking`
+ * above — an agreed-fee payment has no consultation type, meeting format or slot time, and forcing
+ * those fields to placeholder values just to reuse the booking map would misrepresent what actually
+ * happened. All this needs to track is "have we already sent the internal reconciliation email for
+ * this Checkout Session", same in-memory/single-instance caveat as the map above.
+ */
+const finalizedAgreedFeePayments = new Set<string>();
+
+export function isAgreedFeePaymentFinalized(sessionId: string): boolean {
+  return finalizedAgreedFeePayments.has(sessionId);
+}
+
+export function markAgreedFeePaymentFinalized(sessionId: string): void {
+  finalizedAgreedFeePayments.add(sessionId);
+}

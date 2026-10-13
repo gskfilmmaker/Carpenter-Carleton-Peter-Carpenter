@@ -39,3 +39,16 @@ export function getStripeClient(): Stripe | null {
 export function getStatementDescriptor(): string {
   return sanitizeStatementDescriptor(process.env.STATEMENT_DESCRIPTOR || DEFAULT_STATEMENT_DESCRIPTOR);
 }
+
+/**
+ * ID of the existing, already-live Stripe Payment Link used for "pay an agreed fee" (customer
+ * chooses the amount, CAD $1,000–$10,000; see src/content/site.ts for the public URL this ID
+ * belongs to). Checkout Sessions Stripe creates from a customer visiting that hosted URL carry
+ * `session.payment_link` set to this ID — that's how the webhook
+ * (src/app/api/webhooks/stripe/route.ts) tells an agreed-fee payment apart from a $250 consultation
+ * booking (which is created via `stripe.checkout.sessions.create` directly, with no payment_link
+ * at all, plus our own `bookingReference` metadata). Not a secret — Payment Link IDs are visible in
+ * the Stripe dashboard URL and in any Checkout Session object — but it only has meaning server-side,
+ * so it lives here rather than in src/content/site.ts (which client components import).
+ */
+export const AGREED_FEE_PAYMENT_LINK_ID = "plink_1UQBHkC2c8X1kPXix7Fs7TqA";
