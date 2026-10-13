@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { getStripeClient } from "@/lib/payments";
+import { getStripeClient, AGREED_FEE_PAYMENT_LINK_ID } from "@/lib/payments";
 import { emailAdapter } from "@/lib/adapters/email";
 import { calendarAdapter } from "@/lib/adapters/calendar";
-import { isSessionFinalized, markSessionFinalized } from "@/lib/booking-store";
+import {
+  isSessionFinalized,
+  markSessionFinalized,
+  isAgreedFeePaymentFinalized,
+  markAgreedFeePaymentFinalized,
+} from "@/lib/booking-store";
 import { getInternalNotificationRecipients } from "@/lib/server/internal-contact";
 import type { MeetingFormat, VideoPlatform } from "@/lib/adapters/calendar";
 
@@ -43,8 +48,79 @@ export async function POST(request: Request) {
 
   const session = event.data.object as import("stripe").Stripe.Checkout.Session;
 
+  // "Pay an agreed fee" Payment Link: a general-purpose link (customer chooses the amount), not
+  // tied to any specific booking or agreement. Handled entirely separately from the $250
+  // consultation-booking logic below, which trusts `session.metadata` set by our own /api/book
+  // route — a Checkout Session created from a Payment Link never carries that metadata, so letting
+  // it fall through to the booking logic would create a calendar event from an empty slot time and
+  // send the payer a "your consultation is confirmed" email for a payment that has nothing to do
+  // with a consultation.
+  if (session.payment_link === AGREED_FEE_PAYMENT_LINK_ID) {
+    if (isAgreedFeePaymentFinalized(session.id)) {
+      return NextResponse.json({ received: true, alreadyFinalized: true });
+    }
+
+    let receiptUrl: string | undefined;
+    try {
+      if (typeof session.payment_intent === "string") {
+        const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent, {
+          expand: ["latest_charge"],
+        });
+        const charge = paymentIntent.latest_charge;
+        if (charge && typeof charge !== "string") {
+          receiptUrl = charge.receipt_url ?? undefined;
+        }
+      }
+    } catch (error) {
+      console.error("[stripe:webhook] could not retrieve receipt url for agreed-fee payment", error);
+    }
+
+    const amountPaid = typeof session.amount_total === "number" ? session.amount_total / 100 : undefined;
+    const currency = session.currency?.toUpperCase();
+
+    // Internal-only notification — no client-facing email from here. Stripe already sends its own
+    // payment receipt to the customer, and we deliberately avoid inventing any "your payment is
+    // confirmed for X" wording that could read as acknowledging a specific agreement: this
+    // general-purpose link carries no reference to one. This webhook never marks any booking,
+    // invoice or agreement as paid for an agreed-fee payment — staff reconcile manually against the
+    // correct written agreement using the session/receipt details in the email below.
+    const internalResult = await emailAdapter.send({
+      to: getInternalNotificationRecipients(),
+      template: "agreed-fee-payment-received",
+      data: {
+        sessionId: session.id,
+        name: session.customer_details?.name ?? undefined,
+        email: session.customer_details?.email ?? undefined,
+        amountPaid,
+        currency,
+        receiptUrl,
+      },
+    });
+    if (!internalResult.ok) {
+      console.error("[stripe:webhook] agreed-fee internal notification failed to send", internalResult.error);
+    }
+
+    markAgreedFeePaymentFinalized(session.id);
+    return NextResponse.json({ received: true });
+  }
+
   if (isSessionFinalized(session.id)) {
     return NextResponse.json({ received: true, alreadyFinalized: true });
+  }
+
+  // Everything past this point assumes a $250-consultation Checkout Session created by our own
+  // /api/book route, which always sets `bookingReference` in metadata. Anything else that isn't the
+  // agreed-fee Payment Link handled above — a stray test payment, or any future ad hoc Payment Link
+  // created directly in the Stripe dashboard — must NOT be treated as a consultation booking:
+  // without real metadata, slotStartUtc/consultationType would be empty, and the payer would
+  // wrongly receive a "your consultation is confirmed" email for a payment with no consultation
+  // behind it. Verify the metadata exists rather than assuming it.
+  if (!session.metadata?.bookingReference) {
+    console.warn(
+      "[stripe:webhook] checkout.session.completed with no recognized booking metadata and not the agreed-fee payment link — ignoring",
+      session.id
+    );
+    return NextResponse.json({ received: true, unrecognized: true });
   }
 
   const md = session.metadata ?? {};

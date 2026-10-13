@@ -53,6 +53,27 @@ test("/fees shows the real $250 consultation price, not a 'pending approval' pla
   await expect(page.getByText("CAD $250.00")).toBeVisible();
 });
 
+test("/fees shows 'Pay an agreed fee' as a separate option from the $250 consultation, pointing at the real Stripe link", async ({ page }) => {
+  await page.goto("/fees");
+
+  // The $250 consultation option is untouched.
+  await expect(page.getByText("CAD $250.00")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Book now" }).first()).toBeVisible();
+
+  // The agreed-fee option is clearly separate, links to the real Payment Link, opens in a new tab
+  // with safe rel, and states the min/max so customers aren't surprised by Stripe's own limits.
+  const agreedFeeLink = page.getByRole("link", { name: /pay an agreed fee/i });
+  await expect(agreedFeeLink).toBeVisible();
+  await expect(agreedFeeLink).toHaveAttribute("href", "https://buy.stripe.com/7sYdR81UsgHZbgK5743Je00");
+  await expect(agreedFeeLink).toHaveAttribute("target", "_blank");
+  await expect(agreedFeeLink).toHaveAttribute("rel", /noopener/);
+  await expect(page.getByText(/CAD \$1,000/)).toBeVisible();
+  await expect(page.getByText(/CAD \$10,000/)).toBeVisible();
+
+  // No single fixed amount is implied for this option, and it isn't framed as a donation/consultation.
+  await expect(page.getByText(/written (scope and )?fee agreement/i).first()).toBeVisible();
+});
+
 test("/book and /contact FAQs quote the real consultation price, not stale placeholder text", async ({ page }) => {
   for (const path of ["/book", "/contact"]) {
     await page.goto(path);

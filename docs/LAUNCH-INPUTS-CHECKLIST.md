@@ -46,6 +46,23 @@ See build brief section 12 and master-plan section 10 for the source requirement
       Checkout line items, confirmation emails). Get Peter's accountant's answer, then set
       `NEXT_PUBLIC_CONSULT_TAX` (e.g. `"HST 13%"`, or `"Taxes included"` if no separate line should
       show).
+- [ ] **"Pay an agreed fee" — tax wording and GSK branding, both need owner/accountant review.**
+      `/fees` now links to the existing Stripe Payment Link for customers paying an amount already
+      in a written fee agreement (`site.agreedFeePaymentUrl`, `src/lib/payments.ts`'s
+      `AGREED_FEE_PAYMENT_LINK_ID`) — CAD $1,000–$10,000, automatic tax OFF pending the same
+      accountant confirmation as the consultation fee. Two things flagged rather than silently
+      decided:
+      1. The page's existing "Policy notes" line — "All fees are quoted in Canadian dollars.
+         Applicable taxes are noted at checkout" — doesn't cleanly apply to this link, since
+         automatic tax is off there and nothing will be "noted." Added a scoped note right next to
+         the new link instead ("Tax treatment for this payment is to be confirmed with Peter's
+         accountant; it is not calculated or added by this link") without changing the existing
+         page-wide line — confirm whether that general line should be reworded once the accountant
+         answers for both this link and the consultation fee.
+      2. This Payment Link's Stripe Checkout shows "GSK Productions Inc." as the merchant, same as
+         the consultation flow — already disclosed sitewide (`site.managedBy`, footer, `/privacy`),
+         but worth Peter's explicit awareness for this specific link too, since the amounts here
+         (up to $10,000) are larger than the $250 consultation fee.
 - [ ] **Refund/cancellation wording.** The confirmation page and emails currently say "reply to
       your confirmation email and we'll find a new time — there's no charge for rescheduling with
       reasonable notice" as a truthful-but-placeholder policy (`src/components/booking/

@@ -28,7 +28,8 @@ export type EmailTemplate =
   | "booking-prep-guide"
   | "booking-representation-explainer"
   | "pathway-check-summary"
-  | "resource-download";
+  | "resource-download"
+  | "agreed-fee-payment-received"; // internal notification only, see webhook handler comment
 
 export type EmailMessage = {
   to: string | string[];
@@ -64,6 +65,7 @@ const subjects: Record<EmailTemplate, string> = {
   "booking-representation-explainer": "How representation works",
   "pathway-check-summary": "Your Canada Pathway Readiness summary",
   "resource-download": "Your requested guide",
+  "agreed-fee-payment-received": "Agreed-fee payment received — reconcile manually",
 };
 
 /** `booking-internal-notification`'s subject reflects the actual payment status instead of always
@@ -177,6 +179,27 @@ function bodyFor(template: EmailTemplate, data: Record<string, unknown>): string
       return `Thank you for completing the Pathway Clarity Check. This is not an eligibility result or advice — a consultation is the right next step to review your facts and current program instructions.`;
     case "resource-download":
       return `Thank you for your interest. Your requested guide is linked from the resource page — this is general information only, not a personalized checklist.`;
+
+    case "agreed-fee-payment-received": {
+      const amountLine =
+        typeof data.amountPaid === "number"
+          ? `Amount paid: ${data.currency ?? "CAD"} $${data.amountPaid.toFixed(2)}`
+          : "Amount paid: (unknown — check Stripe)";
+      return [
+        `A payment was completed through the "Pay an agreed fee" Stripe Payment Link.`,
+        ``,
+        `Stripe Checkout Session: ${data.sessionId ?? ""}`,
+        `Customer: ${data.name ?? "(not provided)"} <${data.email ?? "(not provided)"}>`,
+        amountLine,
+        data.receiptUrl ? `Receipt: ${data.receiptUrl}` : undefined,
+        ``,
+        `This link is general-purpose and carries no reference to a specific client file or written`,
+        `agreement — reconcile this payment manually against the correct agreement using the Stripe`,
+        `dashboard (session/payment intent ID above) before treating any file as paid.`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
   }
 }
 
